@@ -1,0 +1,1434 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1280" />
+<title>Fordonskollen — Dashboard wireframes</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Caveat:wght@400;700&family=Patrick+Hand&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+  :root {
+    --ink: #1b1b1b;
+    --ink-soft: #4a4a4a;
+    --ink-mute: #8a8a8a;
+    --paper: #fbfaf5;
+    --paper-2: #f3f1e7;
+    --line: #1b1b1b;
+    --accent: #218E33;        /* only used sparingly */
+    --danger: #c1292e;
+    --warn:   #d59b1f;
+    --ok:     #3b9d48;
+  }
+  html, body { background: var(--paper); color: var(--ink); font-family: "Kalam", "Patrick Hand", cursive; }
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-weight: 500; }
+  .hand { font-family: "Kalam", cursive; }
+  .script { font-family: "Caveat", cursive; }
+
+  /* --- Sketchy paper background with faint ruled lines --- */
+  .paper {
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px);
+    background-size: 100% 28px;
+  }
+  .paper-plain { background: var(--paper); }
+
+  /* --- Wobbly hand-drawn stroke via multiple box-shadows & subtle skew --- */
+  .ink-box {
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    box-shadow: 2px 2px 0 0 var(--ink);
+    background: #ffffff;
+  }
+  .ink-box-soft {
+    border: 1.25px solid var(--ink);
+    border-radius: 6px;
+    background: #ffffff;
+  }
+  .ink-dash {
+    border: 1.5px dashed var(--ink);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.6);
+  }
+  .ink-pill {
+    border: 1.25px solid var(--ink);
+    border-radius: 999px;
+    background: #ffffff;
+    padding: 2px 10px;
+    font-family: "Kalam", cursive;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.3;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+  }
+  .ink-pill.filled { background: var(--ink); color: var(--paper); }
+  .ink-btn {
+    border: 1.5px solid var(--ink);
+    border-radius: 6px;
+    box-shadow: 2px 2px 0 0 var(--ink);
+    background: #fff;
+    padding: 6px 14px;
+    font-family: "Kalam", cursive;
+    font-weight: 700;
+    transition: transform 80ms ease, box-shadow 80ms ease;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .ink-btn:hover { transform: translate(1px,1px); box-shadow: 1px 1px 0 0 var(--ink); }
+  .ink-btn:active { transform: translate(2px,2px); box-shadow: 0 0 0 0 var(--ink); }
+  .ink-btn.primary { background: var(--ink); color: var(--paper); }
+  .ink-btn.accent  { background: var(--accent); color: #fff; border-color: #0e5f21; box-shadow: 2px 2px 0 0 #0e5f21; }
+
+  /* Dot status */
+  .dot { width: 10px; height: 10px; border-radius: 999px; border: 1.25px solid var(--ink); display:inline-block; }
+  .dot.ok   { background: var(--ok); }
+  .dot.warn { background: var(--warn); }
+  .dot.bad  { background: var(--danger); }
+  .dot.off  { background: #d9d9d9; }
+
+  /* Underline scribble */
+  .scribble { position: relative; }
+  .scribble::after{
+    content:""; position:absolute; left:-2px; right:-2px; bottom:-6px; height:8px;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 8' preserveAspectRatio='none'><path d='M0 5 C 15 1, 30 8, 45 4 S 75 7, 90 3 S 115 6, 120 4' stroke='%231b1b1b' stroke-width='1.8' fill='none' stroke-linecap='round'/></svg>") center/100% 100% no-repeat;
+  }
+
+  /* Hand-crossed checkbox */
+  .check { width:16px; height:16px; border:1.5px solid var(--ink); border-radius:3px; display:inline-block; position:relative; background:#fff; }
+  .check.on::after {
+    content:""; position:absolute; inset:1px;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M1 6 L5 10 L11 1' stroke='%231b1b1b' stroke-width='2' fill='none' stroke-linecap='round'/></svg>") center/contain no-repeat;
+  }
+
+  /* Small img wash for placeholder silhouettes */
+  .silhouette {
+    filter: grayscale(1) contrast(1.2) brightness(0.65);
+    mix-blend-mode: multiply;
+    opacity: 0.9;
+  }
+  .silhouette-big { filter: grayscale(1) contrast(1.3) brightness(0.55); opacity: 0.92; mix-blend-mode: multiply; }
+
+  /* Tiny wiggle on hover for cards */
+  .wobble:hover { transform: rotate(-0.3deg) translate(-1px,-1px); }
+  .wobble { transition: transform 120ms ease; }
+
+  /* Tab bar */
+  .tab {
+    font-family: "Kalam", cursive; font-weight: 700; font-size: 16px;
+    padding: 8px 16px; border: 1.5px solid var(--ink);
+    border-bottom: none; border-radius: 10px 10px 0 0;
+    background: #fff; color: var(--ink-soft);
+    margin-right: 4px; cursor: pointer; position: relative; top: 1px;
+    white-space: nowrap;
+  }
+  .tab.active { background: var(--ink); color: var(--paper); box-shadow: 2px -2px 0 0 var(--ink); }
+
+  /* Torn-edge strip */
+  .tape {
+    position: absolute; width: 70px; height: 18px;
+    background: rgba(234,196,56,0.45); border: 1px dashed rgba(0,0,0,0.3);
+    transform: rotate(-4deg);
+  }
+
+  /* Legend callout arrow */
+  .arrow { stroke: var(--ink); fill: none; stroke-width: 1.5; stroke-linecap: round; }
+
+  /* function tile */
+  .fn-tile {
+    border: 1.5px solid var(--ink);
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex; flex-direction: column; gap: 6px;
+    min-height: 90px;
+    box-shadow: 2px 2px 0 0 var(--ink);
+    cursor: pointer;
+    transition: transform 80ms ease, box-shadow 80ms ease;
+  }
+  .fn-tile:hover { transform: translate(1px,1px); box-shadow: 1px 1px 0 0 var(--ink); }
+  .fn-tile .ic {
+    width: 28px; height: 28px; border: 1.5px solid var(--ink); border-radius: 6px;
+    display:flex; align-items:center; justify-content:center; background: var(--paper-2); font-size: 14px;
+  }
+
+  /* Tweaks floating panel */
+  .tweaks {
+    position: fixed; right: 18px; bottom: 18px; z-index: 60;
+    background: #fff; border: 1.5px solid var(--ink); border-radius: 10px;
+    box-shadow: 3px 3px 0 0 var(--ink);
+    padding: 14px; min-width: 240px; font-family: "Kalam", cursive;
+  }
+  .tweaks h4 { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+  .tweak-row { display:flex; justify-content:space-between; align-items:center; gap:10px; padding: 4px 0; font-size: 14px; }
+  .tweaks select, .tweaks input { border: 1.25px solid var(--ink); border-radius: 4px; padding: 2px 6px; font-family: inherit; font-size: 13px; background: #fff; }
+
+  /* SVG wobble border to apply as background */
+  .wobble-border {
+    border: none !important;
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'><rect x='1' y='1' width='98' height='98' rx='4' stroke='%231b1b1b' stroke-width='1.6' fill='none' stroke-dasharray='0' stroke-linejoin='round'/></svg>");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-color: #fff;
+    border-radius: 6px;
+  }
+
+  /* Note sticky */
+  .sticky-note {
+    background: #fff6b3; border: 1px solid #d2c67a; padding: 8px 10px;
+    font-family: "Caveat", cursive; font-size: 17px; line-height: 1.2;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+    transform: rotate(-1.2deg);
+  }
+</style>
+
+<!-- Speaker notes / notes: NONE (user didn't ask) -->
+</head>
+<body class="min-h-screen">
+
+<!-- Tweak defaults, persisted on disk -->
+<script>
+const TWEAK_DEFAULS = /*EDITMODE-BEGIN*/{
+  "paperBg": "ruled",
+  "fontFamily": "patrick",
+  "showTape": false,
+  "showColorTouches": false,
+  "defaultOption": "B",
+  "showColorTouches": true
+}/*EDITMODE-END*/;
+</script>
+
+<div id="root"></div>
+
+<script type="text/babel" data-presets="env,react">
+const { useState, useEffect, useMemo } = React;
+
+/* ============================================================
+   DATA — lifted from VehicleList.jsx seed, extended a bit
+   ============================================================ */
+const VEHICLES = [
+  { reg:'ABC 123', type:'sedan',      model:'Volvo V90',            year:2021, km:42130,  status:'ok',   besiktning:'2026-09-12', driver:'Maria Lindqvist', dept:'Kontor',   nextEvent:'Service om 3v',
+    driverSince:'jan 2025', driverHistory:[] },
+  { reg:'DEF 456', type:'truck',      model:'Scania R500',          year:2019, km:218400, status:'warn', besiktning:'2026-05-03', driver:'Johan Ek',        dept:'Logistik', nextEvent:'Besiktning 3 maj',
+    driverSince:'sep 2024', driverHistory:[
+      { name:'Tobias Hård',   periods:['jan 2023 – aug 2024', 'mar 2021 – jun 2022'] },
+      { name:'Marcus Björk',  periods:['sep 2019 – feb 2021'] },
+    ]},
+  { reg:'GHI 789', type:'van',        model:'Volkswagen Crafter',   year:2022, km:87210,  status:'off',  besiktning:'—',          driver:'—',               dept:'Logistik', nextEvent:'Avställd',
+    driverSince:null, driverHistory:[] },
+  { reg:'JKL 012', type:'hatchback',  model:'Toyota Yaris',         year:2023, km:18940,  status:'ok',   besiktning:'2027-02-18', driver:'Sara Persson',    dept:'Kontor',   nextEvent:'Försäkring okt',
+    driverSince:'mar 2023', driverHistory:[] },
+  { reg:'MNO 345', type:'pickup',     model:'Ford Ranger',          year:2020, km:112050, status:'ok',   besiktning:'2026-11-29', driver:'Erik Sundberg',   dept:'Fält',     nextEvent:'Service juni',
+    driverSince:'dec 2022', driverHistory:[
+      { name:'Karin Lövgren', periods:['mar 2020 – nov 2022'] },
+    ]},
+  { reg:'PQR 678', type:'trailer',    model:'Krone Profi SDP',      year:2018, km:0,      status:'warn', besiktning:'2026-05-22', driver:'—',               dept:'Logistik', nextEvent:'Besiktning 22 maj',
+    driverSince:null, driverHistory:[] },
+  { reg:'STU 901', type:'suv',        model:'Volvo XC60',           year:2022, km:54320,  status:'ok',   besiktning:'2027-03-04', driver:'Anna Berg',       dept:'Fält',     nextEvent:'Däckbyte apr',
+    driverSince:'apr 2022', driverHistory:[] },
+  { reg:'VWX 234', type:'tractor',    model:'Valtra N175',          year:2017, km:8420,   status:'off',  besiktning:'—',          driver:'—',               dept:'Lager',    nextEvent:'Avställd',
+    driverSince:null, driverHistory:[] },
+  { reg:'YZA 567', type:'bus',        model:'Mercedes Sprinter 19', year:2021, km:165300, status:'ok',   besiktning:'2026-10-02', driver:'Peter Lund',      dept:'Personal', nextEvent:'Service aug',
+    driverSince:'feb 2026', driverHistory:[
+      { name:'Agneta Söderström', periods:['jun 2023 – jan 2026'] },
+      { name:'Håkan Nilsson',     periods:['okt 2021 – maj 2023', 'mar 2019 – sep 2021'] },
+    ]},
+  { reg:'BCD 890', type:'motorcycle', model:'BMW R 1250 GS',        year:2022, km:24560,  status:'ok',   besiktning:'2027-04-22', driver:'Nils Åberg',      dept:'Fält',     nextEvent:'Besiktning apr',
+    driverSince:'jun 2022', driverHistory:[] },
+  { reg:'EFG 321', type:'camper',     model:'Hymer B-Class',        year:2019, km:48900,  status:'off',  besiktning:'—',          driver:'—',               dept:'Övrigt',   nextEvent:'Avställd',
+    driverSince:null, driverHistory:[] },
+  { reg:'HIJ 654', type:'coupe',      model:'Audi A5',              year:2020, km:71200,  status:'warn', besiktning:'2026-04-29', driver:'Lisa Norling',    dept:'Kontor',   nextEvent:'Besiktning 29 apr',
+    driverSince:'nov 2023', driverHistory:[
+      { name:'Jonas Westman', periods:['feb 2022 – okt 2023'] },
+    ]},
+];
+
+const FUNCTIONS = [
+  { k:'besiktning', label:'Besiktning', sub:'Senaste + nästa datum', ic:'◷' },
+  { k:'service',    label:'Service',    sub:'Verkstadshistorik',      ic:'⚙' },
+  { k:'forsakring', label:'Försäkring', sub:'Bolag & belopp',         ic:'§' },
+  { k:'skatt',      label:'Skatt',      sub:'Transportstyrelsen',     ic:'kr' },
+  { k:'korjournal', label:'Körjournal', sub:'Rutter + sträckor',      ic:'✎' },
+  { k:'kalender',   label:'Kalender',   sub:'Planerade händelser',    ic:'▦' },
+  { k:'felrap',     label:'Felrapport', sub:'Rapportera fel',          ic:'!' },
+  { k:'trailer',    label:'Släpkalkyl', sub:'Laglig last',             ic:'Σ' },
+  { k:'regbevis',   label:'Regbevis',   sub:'Ställ på/av fordon',      ic:'📜'.slice(0,0)+'§' }, // no emoji
+  { k:'budget',     label:'Kostnader',  sub:'Driftsutgifter',          ic:'∑' },
+  { k:'forare',     label:'Förare',     sub:'Tilldelad förare',        ic:'◉' },
+  { k:'dokument',   label:'Dokument',   sub:'PDFer & kvitton',         ic:'▤' },
+];
+
+const STATUS_LABEL = { ok:'Itrafik', warn:'Närmar sig', off:'Avställd' };
+
+/* ============================================================
+   Shared atoms — all hand-sketch flavoured
+   ============================================================ */
+function Logo() {
+  return (
+    <div className="flex items-center gap-2">
+      <svg width="30" height="30" viewBox="0 0 30 30">
+        <path d="M4 20 C 6 12, 12 7, 15 7 S 24 12, 26 20"
+              stroke="var(--ink)" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
+        <circle cx="10" cy="21" r="2.6" stroke="var(--ink)" strokeWidth="1.6" fill="#fff"/>
+        <circle cx="20" cy="21" r="2.6" stroke="var(--ink)" strokeWidth="1.6" fill="#fff"/>
+      </svg>
+      <span style={{fontFamily:'Caveat', fontWeight:700, fontSize:22, letterSpacing:'-0.01em'}}>Fordonskollen</span>
+      <span className="ink-pill" style={{borderStyle:'dashed', fontSize:11}}>wireframe v0.4</span>
+    </div>
+  );
+}
+
+function SketchHeader({ onHome }) {
+  return (
+    <header className="border-b border-dashed border-black/50 bg-[var(--paper)]">
+      <div className="max-w-[1180px] mx-auto px-6 py-3 flex items-center gap-6 whitespace-nowrap">
+        <button onClick={onHome}><Logo/></button>
+        <nav className="hidden md:flex gap-1 ml-4">
+          {['Mina fordon','Kalender','Budgettering','Förare'].map((x,i)=>(
+            <span key={x} className={`px-2.5 py-1 text-sm hand font-bold whitespace-nowrap ${i===0 ? 'scribble text-[var(--ink)]' : 'text-[var(--ink-mute)]'}`}>{x}</span>
+          ))}
+        </nav>
+        <div className="ml-auto flex items-center gap-3">
+          <span className="ink-pill" style={{background:'#fff'}}>Halmstad Åkeri AB</span>
+          <div className="w-8 h-8 rounded-full border-[1.5px] border-black flex items-center justify-center font-bold hand text-sm bg-white shrink-0">ML</div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function StatusDot({ s }) {
+  return <span className={`dot ${s==='ok'?'ok':s==='warn'?'warn':s==='off'?'off':'bad'}`}></span>;
+}
+
+function VehicleThumb({ v, size=40 }) {
+  return (
+    <img
+      src={`assets/vehicles/${v.type}.svg`}
+      alt={v.model}
+      className="silhouette"
+      style={{width:size*1.3, height:size, objectFit:'contain'}}
+    />
+  );
+}
+
+function PlaceholderPhoto({ label='photo', w=240, h=140 }) {
+  return (
+    <div style={{width:w,height:h}} className="border-[1.5px] border-[var(--ink)] rounded-md bg-[var(--paper-2)] relative overflow-hidden">
+      <svg viewBox={`0 0 ${w} ${h}`} className="absolute inset-0 w-full h-full">
+        <line x1="0" y1="0" x2={w} y2={h} stroke="var(--ink)" strokeWidth="0.8" />
+        <line x1={w} y1="0" x2="0" y2={h} stroke="var(--ink)" strokeWidth="0.8" />
+      </svg>
+      <span className="mono absolute left-1 bottom-1 text-[10px] opacity-70">{label}</span>
+    </div>
+  );
+}
+
+function FunctionTile({ f, colorful }) {
+  return (
+    <button className="fn-tile text-left wobble">
+      <div className="flex items-center gap-2">
+        <div className="ic mono" style={{background: colorful ? 'var(--paper-2)' : '#fff'}}>{f.ic}</div>
+        <div className="hand font-bold text-[15px]">{f.label}</div>
+      </div>
+      <div className="text-[12px] text-[var(--ink-mute)]">{f.sub}</div>
+    </button>
+  );
+}
+
+/* ============================================================
+   OPTION A — Grid of vehicle cards → slide-in detail drawer
+   ============================================================ */
+function OptionA({ colorful, showTape }) {
+  const [picked, setPicked] = useState(null);
+  const [filter, setFilter] = useState('all');
+  const shown = VEHICLES.filter(v => filter==='all' ? true : v.status===filter);
+
+  return (
+    <div className="paper min-h-[800px] relative">
+      <SketchHeader onHome={()=>setPicked(null)}/>
+      <div className="max-w-[1180px] mx-auto px-6 py-8">
+        <div className="flex items-end justify-between mb-5">
+          <div>
+            <h1 className="hand font-bold text-3xl scribble inline-block">Mina fordon</h1>
+            <p className="hand text-[var(--ink-mute)] mt-2 text-[15px]">Välj ett fordon för att öppna dess funktioner.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="ink-box-soft px-3 py-1.5 flex items-center gap-2">
+              <span className="mono text-xs opacity-70">sök</span>
+              <span className="hand text-sm text-[var(--ink-mute)]">regnr eller modell…</span>
+            </div>
+            <button className="ink-btn primary">＋ Lägg till fordon</button>
+          </div>
+        </div>
+
+        {/* filter pills */}
+        <div className="flex gap-2 mb-5 flex-wrap">
+          {[['all', `Alla ${VEHICLES.length}`], ['ok', `Itrafik ${VEHICLES.filter(v=>v.status==='ok').length}`],
+            ['warn', `Närmar sig ${VEHICLES.filter(v=>v.status==='warn').length}`], ['off', `Avställda ${VEHICLES.filter(v=>v.status==='off').length}`]
+          ].map(([k,l])=>(
+            <button key={k} onClick={()=>setFilter(k)} className={`ink-pill ${filter===k?'filled':''}`}>{l}</button>
+          ))}
+          <div className="ml-auto flex items-center gap-2 hand text-sm text-[var(--ink-mute)]">
+            <span>sortera:</span>
+            <span className="ink-pill" style={{background:'#fff'}}>regnr ▾</span>
+          </div>
+        </div>
+
+        {/* grid */}
+        <div className="grid grid-cols-4 gap-4">
+          {shown.map(v => (
+            <button key={v.reg} onClick={()=>setPicked(v)}
+              className="ink-box p-3 text-left wobble relative bg-white">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="mono text-[17px] font-bold tracking-wider">{v.reg}</div>
+                  <div className="hand text-sm text-[var(--ink-soft)] mt-0.5">{v.model}</div>
+                </div>
+                <div className="flex items-center gap-1 ink-pill" style={{fontSize:11, padding:'1px 6px',
+                  background: colorful && v.status==='ok' ? '#e8f5ea' : colorful && v.status==='warn' ? '#fdf3d4' : colorful && v.status==='off' ? '#fbe0e0' : '#fff'}}>
+                  <StatusDot s={v.status}/><span>{STATUS_LABEL[v.status]}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-center py-3">
+                <VehicleThumb v={v} size={48}/>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="mono text-[var(--ink-mute)]">{v.year}</span>
+                <span className="mono text-[var(--ink-mute)]">{v.km.toLocaleString('sv-SE')} km</span>
+              </div>
+              <div className="mt-2 pt-2 border-t border-dashed border-black/30 hand text-[12.5px]">
+                <span className="text-[var(--ink-mute)]">nästa: </span>{v.nextEvent}
+              </div>
+            </button>
+          ))}
+          {/* add-card */}
+          <button className="ink-dash flex flex-col items-center justify-center min-h-[180px] wobble">
+            <div className="text-3xl hand">＋</div>
+            <div className="hand text-sm">Lägg till fordon</div>
+            <div className="mono text-[11px] text-[var(--ink-mute)] mt-1">regnr-först flöde</div>
+          </button>
+        </div>
+
+        {showTape && <div className="tape" style={{top:88, left:-8}}></div>}
+      </div>
+
+      {/* Drawer */}
+      {picked && (
+        <div className="fixed inset-0 z-40 bg-black/30 flex justify-end" onClick={()=>setPicked(null)}>
+          <div onClick={e=>e.stopPropagation()}
+            className="h-full bg-[var(--paper)] border-l-2 border-black overflow-y-auto"
+            style={{width:'min(720px, 80vw)'}}>
+            <div className="px-6 py-5 border-b border-dashed border-black/50 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <VehicleThumb v={picked} size={42}/>
+                <div>
+                  <div className="mono text-xl font-bold tracking-wider">{picked.reg}</div>
+                  <div className="hand text-sm text-[var(--ink-soft)]">{picked.model} · {picked.year}</div>
+                </div>
+                <div className="ink-pill ml-3" style={{
+                  background: colorful && picked.status==='ok' ? '#e8f5ea' : colorful && picked.status==='warn' ? '#fdf3d4' : '#fbe0e0'
+                }}>
+                  <StatusDot s={picked.status}/> <span className="ml-1">{STATUS_LABEL[picked.status]}</span>
+                </div>
+              </div>
+              <button onClick={()=>setPicked(null)} className="ink-btn">stäng ✕</button>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                <div className="ink-box-soft p-3">
+                  <div className="mono text-[10px] text-[var(--ink-mute)]">MÄTARSTÄLLNING</div>
+                  <div className="hand text-lg font-bold">{picked.km.toLocaleString('sv-SE')} km</div>
+                </div>
+                <div className="ink-box-soft p-3">
+                  <div className="mono text-[10px] text-[var(--ink-mute)]">FÖRARE</div>
+                  <div className="hand text-lg font-bold">{picked.driver}</div>
+                </div>
+                <div className="ink-box-soft p-3">
+                  <div className="mono text-[10px] text-[var(--ink-mute)]">NÄSTA BESIKTNING</div>
+                  <div className="hand text-lg font-bold mono">{picked.besiktning}</div>
+                </div>
+              </div>
+
+              <div className="hand font-bold text-lg mb-2 scribble inline-block">Funktioner</div>
+              <div className="grid grid-cols-3 gap-3 mt-4">
+                {FUNCTIONS.map(f => <FunctionTile key={f.k} f={f} colorful={colorful}/>)}
+              </div>
+
+              <div className="mt-6 sticky-note inline-block">
+                Tanken: en "workspace" per fordon — allt om <b>{picked.reg}</b> i en låda.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
+   OPTION B — Fleet Dashboard map view sub-components
+   ============================================================ */
+
+/* Fake GPS positions per vehicle, normalized 0–1 within SVG 800×500 */
+const VEHICLE_POSITIONS = {
+  'ABC 123': [0.44, 0.62],
+  'DEF 456': [0.36, 0.43],
+  'GHI 789': [0.57, 0.49],
+  'JKL 012': [0.63, 0.66],
+  'MNO 345': [0.27, 0.56],
+  'PQR 678': [0.49, 0.34],
+  'STU 901': [0.71, 0.41],
+  'VWX 234': [0.34, 0.76],
+  'YZA 567': [0.55, 0.71],
+  'BCD 890': [0.73, 0.54],
+  'EFG 321': [0.24, 0.37],
+  'HIJ 654': [0.50, 0.53],
+};
+
+function MapView({ vehicles, colorful, redAlerts, orangeAlerts, onSelectVehicle }) {
+  const allClear = redAlerts.length === 0;
+  return (
+    <div className="ink-box flex flex-col" style={{ minHeight: 520 }}>
+      {/* Map header */}
+      <div className="px-4 py-2.5 border-b border-dashed border-black/40 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="hand font-bold text-[15px]">Kartvy</span>
+          <span className="mono text-[11px] text-[var(--ink-mute)]">· live GPS</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 hand text-[12px] text-[var(--ink-mute)]">
+            <span className="flex items-center gap-1"><span className="dot ok"/>Aktiv</span>
+            <span className="flex items-center gap-1"><span className="dot warn"/>Varning</span>
+            <span className="flex items-center gap-1"><span className="dot off"/>Avställd</span>
+          </div>
+          <span className="mono text-[11px] text-[var(--ink-mute)]">uppdaterad 07:41</span>
+        </div>
+      </div>
+
+      {/* SVG map area */}
+      <div className="flex-1 relative overflow-hidden bg-[var(--paper-2)]">
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet">
+          {/* Faint grid */}
+          {[100,200,300,400].map(y=>(
+            <line key={'gy'+y} x1="0" y1={y} x2="800" y2={y} stroke="rgba(0,0,0,0.055)" strokeWidth="1"/>
+          ))}
+          {[100,200,300,400,500,600,700].map(x=>(
+            <line key={'gx'+x} x1={x} y1="0" x2={x} y2="500" stroke="rgba(0,0,0,0.055)" strokeWidth="1"/>
+          ))}
+          {/* Sketch road network */}
+          <path d="M 180 90 C 240 150, 270 210, 295 285 S 315 385, 355 445" stroke="rgba(0,0,0,0.13)" strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+          <path d="M 295 285 C 355 262, 408 248, 455 238 S 558 218, 610 198" stroke="rgba(0,0,0,0.13)" strokeWidth="2.2" fill="none" strokeLinecap="round"/>
+          <path d="M 355 305 C 405 322, 465 338, 525 348" stroke="rgba(0,0,0,0.10)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+          <path d="M 455 238 C 462 292, 472 342, 482 402" stroke="rgba(0,0,0,0.10)" strokeWidth="1.5" fill="none" strokeLinecap="round"/>
+          <path d="M 180 90 C 210 95, 270 88, 350 80 S 460 75, 530 95" stroke="rgba(0,0,0,0.08)" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+
+          {/* Map label */}
+          <text x="14" y="22" fontFamily="Kalam, cursive" fontSize="13" fill="rgba(0,0,0,0.28)">Halmstad Åkeri — fordonspositioner</text>
+
+          {/* Vehicle pins */}
+          {vehicles.map(v => {
+            const pos = VEHICLE_POSITIONS[v.reg];
+            if (!pos) return null;
+            const x = pos[0] * 800;
+            const y = pos[1] * 500;
+            const hasRed    = redAlerts.some(a => a.reg === v.reg);
+            const hasOrange = orangeAlerts.some(a => a.reg === v.reg);
+            const pinFill   = v.status==='ok' ? '#3b9d48' : v.status==='warn' ? '#d59b1f' : '#c1292e';
+            const ringColor = hasRed ? '#c1292e' : hasOrange ? '#d59b1f' : null;
+            return (
+              <g key={v.reg} onClick={()=>onSelectVehicle(v.reg)} style={{cursor:'pointer'}}>
+                {ringColor && (
+                  <circle cx={x} cy={y} r="15" fill="none" stroke={ringColor} strokeWidth="1.8" strokeDasharray="3 2.5"/>
+                )}
+                <circle cx={x} cy={y} r="9" fill={pinFill} stroke="var(--ink)" strokeWidth="1.6"/>
+                {v.status==='off' && <>
+                  <line x1={x-4} y1={y-4} x2={x+4} y2={y+4} stroke="white" strokeWidth="1.8"/>
+                  <line x1={x+4} y1={y-4} x2={x-4} y2={y+4} stroke="white" strokeWidth="1.8"/>
+                </>}
+                <text x={x+13} y={y+4} fontFamily="JetBrains Mono, monospace" fontSize="10" fontWeight="600" fill="var(--ink)">{v.reg}</text>
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Status banner — calm or alert */}
+        <div className="absolute bottom-4 left-4">
+          {allClear ? (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg hand text-sm"
+              style={{background:'rgba(59,157,72,0.12)', border:'1px solid rgba(59,157,72,0.5)'}}>
+              <span className="dot ok"/>
+              Alla aktiva fordon ute i trafik — inga akuta larm
+            </div>
+          ) : (
+            <div className="ink-box px-3 py-2 flex items-center gap-2 hand text-sm"
+              style={{borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)', background:'#fff8f8'}}>
+              <span className="dot bad"/>
+              <span style={{color:'var(--danger)', fontWeight:700}}>{redAlerts.length} akuta larm — klicka fordon på kartan</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* DriverCell — default card state only; expansion is handled by the parent grid.
+   onExpand is only passed when history exists. */
+function DriverCell({ driver, driverSince, driverHistory = [], onExpand }) {
+  const hasHistory = driverHistory.length > 0;
+  const noDriver   = driver === '—';
+  return (
+    <div className="ink-box-soft p-3">
+      <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">Förare</div>
+      <div className="hand font-bold text-[17px] mt-1">{noDriver ? '—' : driver}</div>
+      {!noDriver && driverSince
+        ? <div className="hand text-[12px] text-[var(--ink-mute)]">sedan {driverSince}</div>
+        : !noDriver && <div className="hand text-[12px] text-[var(--ink-mute)]">tilldelad</div>
+      }
+      {noDriver && <div className="hand text-[12px] text-[var(--ink-mute)]">ingen tilldelad</div>}
+      {hasHistory && (
+        <button onClick={onExpand}
+          className="hand text-[12px] mt-2 flex items-center gap-1 hover:opacity-70"
+          style={{color:'var(--ink-mute)'}}>
+          <span style={{fontSize:9}}>▸</span>
+          {driverHistory.length} tidigare {driverHistory.length === 1 ? 'förare' : 'förare'}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* DriverExpanded — full-width history panel shown when the driver card is expanded.
+   Two-column layout: current driver left, history right. Groups periods under each name. */
+function DriverExpanded({ driver, driverSince, driverHistory = [] }) {
+  const noDriver = driver === '—';
+  return (
+    <div className="flex gap-8">
+      {/* Left: current driver */}
+      <div className="shrink-0" style={{minWidth:180}}>
+        <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider mb-1">Nuvarande förare</div>
+        <div className="hand font-bold text-[20px] leading-tight">{noDriver ? '—' : driver}</div>
+        {!noDriver && driverSince && (
+          <div className="hand text-[13px] text-[var(--ink-mute)] mt-0.5">sedan {driverSince}</div>
+        )}
+        {noDriver && <div className="hand text-[13px] text-[var(--ink-mute)]">ingen tilldelad</div>}
+      </div>
+
+      {/* Divider */}
+      {driverHistory.length > 0 && <div className="w-px bg-black/15 self-stretch"/>}
+
+      {/* Right: history grouped by person */}
+      {driverHistory.length > 0 && (
+        <div className="flex-1 min-w-0">
+          <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider mb-3">Tidigare förare</div>
+          <div className="flex flex-wrap gap-x-8 gap-y-3">
+            {driverHistory.map((d, i) => (
+              <div key={i} className="min-w-[180px]">
+                <div className="hand font-bold text-[14px] leading-tight">{d.name}</div>
+                <div className="mt-1 space-y-0.5">
+                  {d.periods.map((p, j) => (
+                    <div key={j} className="flex items-center gap-2">
+                      <span className="mono text-[11px] text-[var(--ink-mute)]">{p}</span>
+                      {d.periods.length > 1 && j > 0 && (
+                        <span className="hand text-[10px] italic" style={{color:'var(--warn)'}}>återkom</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function VehicleDetail({ v, colorful, redAlerts, orangeAlerts, onBack }) {
+  const [tab, setTab]               = useState('översikt');
+  const [expandedCard, setExpanded] = useState(null); // null | 'driver' | card id
+
+  /* Reset expanded card when switching tabs */
+  function switchTab(t) { setTab(t); setExpanded(null); }
+
+  const statusBg = colorful
+    ? (v.status==='ok' ? '#e8f5ea' : v.status==='warn' ? '#fdf3d4' : '#fbe0e0')
+    : '#fff';
+
+  const staticCards = [
+    { id:'km',        label:'Mätarställning', value: v.km.toLocaleString('sv-SE')+' km', sub:'uppdaterad 12 apr' },
+    { id:'event',     label:'Nästa händelse',  value: v.nextEvent,                        sub:'auto-påminnelse aktiv' },
+    { id:'insurance', label:'Försäkring',      value:'If Skade',                          sub:'giltig till 2026-12' },
+    { id:'tax',       label:'Skatt',           value:'4 820 kr / år',                     sub:'nästa: maj 2026' },
+    { id:'fuel',      label:'Bränsle apr',     value:'1 240 kr',                          sub:'est. snittförbrukning' },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <button onClick={onBack} className="flex items-center gap-1.5 hand text-[var(--ink-mute)] hover:text-[var(--ink)]" style={{fontSize:14}}>
+        ← Tillbaka till karta
+      </button>
+
+      <div className="ink-box p-4 flex items-center gap-5">
+        <div className="ink-box-soft p-2 bg-[var(--paper-2)] shrink-0">
+          <VehicleThumb v={v} size={56}/>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h2 className="hand font-bold text-3xl whitespace-nowrap">{v.reg}</h2>
+            <span className="ink-pill" style={{background:statusBg}}>
+              <StatusDot s={v.status}/> <span className="ml-1">{STATUS_LABEL[v.status]}</span>
+            </span>
+          </div>
+          <div className="hand text-[var(--ink-mute)]">{v.model} · {v.year} · {v.dept}</div>
+          <div className="mono text-[11px] text-[var(--ink-mute)] mt-0.5">GPS senast uppdaterad: 07:39</div>
+        </div>
+        <div className="flex gap-2 shrink-0">
+          <button className="ink-btn" style={{fontSize:13}}>Rapportera fel</button>
+          <button className="ink-btn primary" style={{fontSize:13}}>Redigera</button>
+        </div>
+      </div>
+
+      {redAlerts.map(a => (
+        <div key={a.reg+a.label} className="ink-box p-3 flex items-center justify-between"
+          style={{borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)', background:'#fff8f8'}}>
+          <div className="flex items-center gap-2">
+            <span className="dot bad"/>
+            <div>
+              <div className="hand font-bold" style={{color:'var(--danger)'}}>{a.label}</div>
+              <div className="hand text-[12px] text-[var(--ink-mute)]">{a.detail}</div>
+            </div>
+          </div>
+          <button className="ink-btn" style={{fontSize:13, borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)'}}>{a.actionLabel}</button>
+        </div>
+      ))}
+
+      {orangeAlerts.map(a => (
+        <div key={a.reg+a.label} className="ink-box-soft p-3 flex items-center justify-between"
+          style={{borderColor:'var(--warn)', background:'#fffbee'}}>
+          <div className="flex items-center gap-2">
+            <span className="dot warn"/>
+            <div>
+              <div className="hand font-bold">{a.label}</div>
+              <div className="hand text-[12px] text-[var(--ink-mute)]">{a.detail}</div>
+            </div>
+          </div>
+          <button className="ink-btn" style={{fontSize:13}}>{a.actionLabel}</button>
+        </div>
+      ))}
+
+      <div>
+        <div className="flex border-b-[1.5px] border-black overflow-x-auto">
+          {['översikt','besiktning','service','försäkring','körjournal','dokument'].map(t=>(
+            <button key={t} onClick={()=>switchTab(t)} className={`tab ${tab===t?'active':''}`}>{t}</button>
+          ))}
+        </div>
+        <div className="ink-box p-5 -mt-[1.5px] rounded-t-none">
+          {tab === 'översikt' && !expandedCard && (
+            /* ── Default grid layout ── */
+            <div className="grid grid-cols-3 gap-4">
+              {staticCards.map(c => (
+                <div key={c.id} className="ink-box-soft p-3">
+                  <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">{c.label}</div>
+                  <div className="hand font-bold text-[17px] mt-1">{c.value}</div>
+                  <div className="hand text-[12px] text-[var(--ink-mute)]">{c.sub}</div>
+                </div>
+              ))}
+              <DriverCell
+                driver={v.driver} driverSince={v.driverSince} driverHistory={v.driverHistory||[]}
+                onExpand={() => setExpanded('driver')}
+              />
+              <div className="col-span-3 grid grid-cols-4 gap-3 mt-2">
+                {FUNCTIONS.slice(0,8).map(f => <FunctionTile key={f.k} f={f} colorful={colorful}/>)}
+              </div>
+            </div>
+          )}
+
+          {tab === 'översikt' && expandedCard && (
+            /* ── Expanded layout: compact strip + full-width focused card ── */
+            <div>
+              {/* Compact strip — other cards shrink to single-line chips.
+                  Clicking a chip switches focus. ← standardvy always visible right. */}
+              <div className="flex flex-wrap items-center gap-2 pb-3 mb-4 border-b border-dashed border-black/25">
+                {staticCards.filter(c => c.id !== expandedCard).map(c => (
+                  <button key={c.id} onClick={() => setExpanded(c.id)}
+                    className="ink-box-soft px-2.5 py-1.5 flex items-center gap-1.5 hover:bg-[var(--paper-2)] text-left">
+                    <span className="mono text-[9px] text-[var(--ink-mute)] uppercase tracking-wider whitespace-nowrap">{c.label}</span>
+                    <span className="hand font-bold text-[13px] whitespace-nowrap">{c.value}</span>
+                  </button>
+                ))}
+                {expandedCard !== 'driver' && (
+                  <button onClick={() => setExpanded('driver')}
+                    className="ink-box-soft px-2.5 py-1.5 flex items-center gap-1.5 hover:bg-[var(--paper-2)]">
+                    <span className="mono text-[9px] text-[var(--ink-mute)] uppercase tracking-wider">Förare</span>
+                    <span className="hand font-bold text-[13px]">{v.driver}</span>
+                  </button>
+                )}
+                <button onClick={() => setExpanded(null)}
+                  className="ml-auto ink-btn" style={{fontSize:12, padding:'4px 10px'}}>
+                  ← standardvy
+                </button>
+              </div>
+
+              {/* Full-width expanded content */}
+              {expandedCard === 'driver' && (
+                <DriverExpanded driver={v.driver} driverSince={v.driverSince} driverHistory={v.driverHistory||[]}/>
+              )}
+              {expandedCard !== 'driver' && (() => {
+                const c = staticCards.find(x => x.id === expandedCard);
+                return c ? (
+                  <div>
+                    <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">{c.label}</div>
+                    <div className="hand font-bold text-3xl mt-1">{c.value}</div>
+                    <div className="hand text-[13px] text-[var(--ink-mute)] mt-0.5">{c.sub}</div>
+                  </div>
+                ) : null;
+              })()}
+            </div>
+          )}
+
+          {tab !== 'översikt' && (
+            <div className="min-h-[280px] flex items-center justify-center">
+              <div className="text-center">
+                <div className="hand text-xl font-bold">[ {tab} ]</div>
+                <div className="hand text-[var(--ink-mute)] mt-1">fliken "{tab}" för {v.reg}</div>
+                <div className="mt-3 mono text-[11px] text-[var(--ink-mute)]">wireframe · full vy utvecklas separat</div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   OPTION B — Fleet Dashboard: top bar + sidebar + map/detail
+   Laws of Simplicity applied: Reduce · Organize · Trust · Time
+   ============================================================ */
+function OptionB({ colorful }) {
+  const [selectedReg, setSelectedReg]       = useState(null);
+  const [sidebarFilter, setSidebarFilter]   = useState('all');
+  const [sidebarSearch, setSidebarSearch]   = useState('');
+  const [alertPaneOpen, setAlertPaneOpen]   = useState(false);
+
+  const picked = selectedReg ? VEHICLES.find(v => v.reg === selectedReg) : null;
+
+  /* ── Derived alerts ── */
+  const redAlerts = [
+    { reg:'HIJ 654', label:'Besiktning förfallen',       detail:'Bilen måste genomgå besiktning omedelbart',        action:'besiktning', actionLabel:'Öppna besiktning →' },
+    { reg:'GHI 789', label:'Avställd utan tillåtelse',   detail:'Fordon kördes avställt 2026-04-18',                action:'korjournal', actionLabel:'Visa körjournal →' },
+  ];
+  const orangeAlerts = [
+    { reg:'DEF 456', label:'Besiktning om 13 dagar',     detail:'Nästa besiktning: 3 maj 2026',                     action:'besiktning', actionLabel:'Boka besiktning →' },
+    { reg:'PQR 678', label:'Besiktning om 32 dagar',     detail:'Nästa besiktning: 22 maj 2026',                    action:'besiktning', actionLabel:'Boka besiktning →' },
+    { reg:'ABC 123', label:'Service om 3 veckor',        detail:'Rekommenderat serviceintervall infaller om 21 dagar', action:'service', actionLabel:'Boka service →' },
+  ];
+
+  /* ── Top bar stats ── */
+  const activeCount = VEHICLES.filter(v => v.status==='ok').length;
+  const nextMaint   = [...VEHICLES].filter(v => v.besiktning !== '—').sort((a,b) => a.besiktning.localeCompare(b.besiktning))[0];
+  const daysToNext  = nextMaint ? Math.round((new Date(nextMaint.besiktning) - new Date('2026-04-20')) / 86400000) : null;
+  const urgentColor = daysToNext < 14 ? 'var(--danger)' : daysToNext < 30 ? 'var(--warn)' : 'var(--ink)';
+
+  /* ── Sidebar filtering & sort (warnings first) ── */
+  const sortOrder = { warn:0, ok:1, off:2 };
+  const filteredVehicles = [...VEHICLES]
+    .filter(v => sidebarFilter==='all' || v.status===sidebarFilter)
+    .filter(v => {
+      if (!sidebarSearch) return true;
+      const q = sidebarSearch.toLowerCase();
+      return v.reg.toLowerCase().includes(q) || v.model.toLowerCase().includes(q) || v.driver.toLowerCase().includes(q);
+    })
+    .sort((a,b) => sortOrder[a.status] - sortOrder[b.status]);
+
+  function handleAlertClick(alert) {
+    setSelectedReg(alert.reg);
+    setAlertPaneOpen(false);
+  }
+
+  return (
+    <div className="paper" style={{minHeight:'100vh'}}>
+      <SketchHeader onHome={()=>{ setSelectedReg(null); setAlertPaneOpen(false); }}/>
+
+      {/* ─────────── TOP BAR: 4 KPI metrics (3-second glance) ─────────── */}
+      <div className="border-b-[1.5px] border-dashed border-black/40 bg-white">
+        <div className="max-w-[1180px] mx-auto px-6 py-3 flex items-center gap-0">
+
+          {/* KPI 1 — Active vehicles */}
+          <div className="flex items-center gap-2.5 pr-6">
+            <span className="dot ok"/>
+            <div>
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Aktiva fordon</div>
+              <div className="hand font-bold text-xl leading-tight">{activeCount}/{VEHICLES.length}</div>
+            </div>
+          </div>
+          <div className="w-px h-9 bg-black/15 mr-6"/>
+
+          {/* KPI 2 — Alerts (clickable, opens pane) */}
+          <button onClick={()=>setAlertPaneOpen(o=>!o)}
+            className="flex items-center gap-2.5 pr-6 hover:opacity-75 transition-opacity">
+            <div>
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Larm</div>
+              <div className="flex items-center gap-2 leading-tight">
+                {redAlerts.length > 0 && (
+                  <span className="hand font-bold text-xl" style={{color:'var(--danger)'}}>{redAlerts.length} akut</span>
+                )}
+                {orangeAlerts.length > 0 && (
+                  <span className="hand font-bold text-xl" style={{color:'var(--warn)'}}>
+                    {redAlerts.length > 0 && <span className="opacity-40 mr-1">·</span>}{orangeAlerts.length} planerat
+                  </span>
+                )}
+                {redAlerts.length===0 && orangeAlerts.length===0 && (
+                  <span className="hand font-bold text-xl" style={{color:'var(--ok)'}}>Allt klart ✓</span>
+                )}
+                <span className="mono text-[10px] text-[var(--ink-mute)]">{alertPaneOpen ? '▴' : '▾'}</span>
+              </div>
+            </div>
+          </button>
+          <div className="w-px h-9 bg-black/15 mr-6"/>
+
+          {/* KPI 3 — Fuel cost */}
+          <div className="flex items-center gap-2.5 pr-6">
+            <div>
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Bränsle apr</div>
+              <div className="hand font-bold text-xl leading-tight">12 840 kr</div>
+            </div>
+          </div>
+          <div className="w-px h-9 bg-black/15 mr-6"/>
+
+          {/* KPI 4 — Next maintenance */}
+          <div className="flex items-center gap-2.5">
+            <div>
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Nästa service</div>
+              <div className="flex items-center gap-1.5 leading-tight">
+                <span className="hand font-bold text-xl" style={{color:urgentColor}}>{daysToNext} dagar</span>
+                <span className="mono text-[11px] text-[var(--ink-mute)]">· {nextMaint?.reg}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="ml-auto mono text-[11px] text-[var(--ink-mute)]">uppdaterad 07:42</div>
+        </div>
+      </div>
+
+      {/* ─────────── ALERT PANE (drops under top bar on demand) ─────────── */}
+      {alertPaneOpen && (
+        <div className="border-b-2 border-black bg-white">
+          <div className="max-w-[1180px] mx-auto px-6 py-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="hand font-bold text-lg">Aktiva larm</div>
+              <button onClick={()=>setAlertPaneOpen(false)} className="hand text-[var(--ink-mute)] text-sm hover:text-[var(--ink)]">stäng ✕</button>
+            </div>
+
+            {redAlerts.length > 0 && (
+              <div className="mb-4">
+                <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{color:'var(--danger)'}}>Akuta larm — åtgärd krävs nu</div>
+                <div className="space-y-2">
+                  {redAlerts.map(a => (
+                    <div key={a.reg+a.label} className="ink-box p-3 flex items-center justify-between"
+                      style={{borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)', background:'#fff8f8'}}>
+                      <div className="flex items-center gap-2">
+                        <span className="dot bad"/>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="hand font-bold">{a.label}</span>
+                            <span className="mono text-[12px] text-[var(--ink-mute)]">· {a.reg}</span>
+                          </div>
+                          <div className="hand text-[12px] text-[var(--ink-mute)]">{a.detail}</div>
+                        </div>
+                      </div>
+                      <button onClick={()=>handleAlertClick(a)} className="ink-btn" style={{fontSize:13, borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)'}}>{a.actionLabel}</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {orangeAlerts.length > 0 && (
+              <div>
+                <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{color:'var(--warn)'}}>Planerade åtgärder — inom 30 dagar</div>
+                <div className="space-y-2">
+                  {orangeAlerts.map(a => (
+                    <div key={a.reg+a.label} className="ink-box-soft p-3 flex items-center justify-between"
+                      style={{borderColor:'var(--warn)', background:'#fffbee'}}>
+                      <div className="flex items-center gap-2">
+                        <span className="dot warn"/>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="hand font-bold">{a.label}</span>
+                            <span className="mono text-[12px] text-[var(--ink-mute)]">· {a.reg}</span>
+                          </div>
+                          <div className="hand text-[12px] text-[var(--ink-mute)]">{a.detail}</div>
+                        </div>
+                      </div>
+                      <button onClick={()=>handleAlertClick(a)} className="ink-btn" style={{fontSize:13}}>{a.actionLabel}</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ─────────── MAIN LAYOUT: sidebar + content ─────────── */}
+      <div className="max-w-[1180px] mx-auto px-6 py-4 flex gap-5" style={{minHeight:'calc(100vh - 160px)'}}>
+
+        {/* ── Left sidebar: scrollable vehicle list ── */}
+        <div className="w-[252px] shrink-0 flex flex-col gap-3">
+          {/* Search */}
+          <div className="ink-box-soft px-3 py-2 flex items-center gap-2">
+            <span className="mono text-xs opacity-60">🔎︎</span>
+            <input
+              value={sidebarSearch}
+              onChange={e=>setSidebarSearch(e.target.value)}
+              placeholder="sök regnr / förare…"
+              className="flex-1 bg-transparent hand text-sm outline-none"
+              style={{fontFamily:'Kalam, cursive', color:'var(--ink)'}}
+            />
+          </div>
+
+          {/* Status filter */}
+          <div className="flex gap-1 flex-wrap">
+            {[['all','Alla'],['ok','Aktiva'],['warn','Varning'],['off','Avställda']].map(([k,l])=>(
+              <button key={k} onClick={()=>setSidebarFilter(k)}
+                className={`ink-pill ${sidebarFilter===k?'filled':''}`} style={{fontSize:11}}>{l}</button>
+            ))}
+          </div>
+
+          {/* Vehicle list — warnings float to top */}
+          <div className="flex-1 space-y-1.5 overflow-y-auto pr-0.5" style={{maxHeight:'calc(100vh - 330px)'}}>
+            {filteredVehicles.map(v => {
+              const active     = v.reg === selectedReg;
+              const hasRed     = redAlerts.some(a => a.reg === v.reg);
+              const hasOrange  = orangeAlerts.some(a => a.reg === v.reg);
+              const borderColor = !active && hasRed ? 'var(--danger)' : !active && hasOrange ? 'var(--warn)' : 'var(--ink)';
+              return (
+                <button key={v.reg}
+                  onClick={()=>setSelectedReg(active ? null : v.reg)}
+                  className="w-full text-left p-2.5 border-[1.5px] rounded-md flex items-center gap-3 wobble"
+                  style={{
+                    borderColor,
+                    background: active ? 'var(--ink)' : '#fff',
+                    color: active ? 'var(--paper)' : 'var(--ink)',
+                    boxShadow: active ? '2px 2px 0 0 #555' : `2px 2px 0 0 ${borderColor}`,
+                  }}>
+                  <VehicleThumb v={v} size={26}/>
+                  <div className="flex-1 min-w-0">
+                    <div className="mono text-[13px] font-bold tracking-wider">{v.reg}</div>
+                    <div className="hand text-[11.5px] truncate" style={{opacity:active?0.8:0.65}}>{v.model}</div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <StatusDot s={v.status}/>
+                    {!active && (hasRed||hasOrange) && (
+                      <span style={{width:5,height:5,borderRadius:'50%',display:'inline-block',
+                        background: hasRed ? 'var(--danger)' : 'var(--warn)'}}/>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Add vehicle */}
+          <button className="ink-dash flex items-center justify-center gap-2 py-2.5 wobble">
+            <span className="hand text-sm">＋ Lägg till fordon</span>
+          </button>
+        </div>
+
+        {/* ── Main area: map (default) or vehicle detail ── */}
+        <div className="flex-1 min-w-0">
+          {!picked
+            ? <MapView
+                vehicles={VEHICLES}
+                colorful={colorful}
+                redAlerts={redAlerts}
+                orangeAlerts={orangeAlerts}
+                onSelectVehicle={setSelectedReg}
+              />
+            : <VehicleDetail
+                v={picked}
+                colorful={colorful}
+                redAlerts={redAlerts.filter(a => a.reg===picked.reg)}
+                orangeAlerts={orangeAlerts.filter(a => a.reg===picked.reg)}
+                onBack={()=>setSelectedReg(null)}
+              />
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   OPTION C — Fleet-health hub with urgency-sorted rows
+   ============================================================ */
+function OptionC({ colorful }) {
+  const [expandedReg, setExpandedReg] = useState('HIJ 654');
+  const sortOrder = { warn:0, off:1, ok:2 };
+  const sorted = [...VEHICLES].sort((a,b)=> sortOrder[a.status] - sortOrder[b.status]);
+  const counts = {
+    total: VEHICLES.length,
+    itrafik: VEHICLES.filter(v=>v.status==='ok').length,
+    narmar: VEHICLES.filter(v=>v.status==='warn').length,
+    avstalld: VEHICLES.filter(v=>v.status==='off').length,
+  };
+
+  return (
+    <div className="paper min-h-[800px]">
+      <SketchHeader/>
+      <div className="max-w-[1180px] mx-auto px-6 py-6">
+        {/* KPI strip */}
+        <div className="flex items-end justify-between mb-5">
+          <h1 className="hand font-bold text-3xl scribble inline-block">Flotthälsa</h1>
+          <div className="hand text-sm text-[var(--ink-mute)]">april 2026 · uppdaterad 07:42</div>
+        </div>
+
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="ink-box p-4">
+            <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">Totalt</div>
+            <div className="hand font-bold text-4xl">{counts.total}</div>
+            <div className="hand text-[12px] text-[var(--ink-mute)]">fordon i flottan</div>
+          </div>
+          <div className="ink-box p-4" style={{background: colorful ? '#eef7f0' : '#fff'}}>
+            <div className="flex items-center gap-1.5"><StatusDot s="ok"/><div className="mono text-[10px] uppercase tracking-wider">Itrafik</div></div>
+            <div className="hand font-bold text-4xl">{counts.itrafik}</div>
+            <div className="hand text-[12px] text-[var(--ink-mute)]">inga åtgärder nu</div>
+          </div>
+          <div className="ink-box p-4" style={{background: colorful ? '#fdf4d7' : '#fff'}}>
+            <div className="flex items-center gap-1.5"><StatusDot s="warn"/><div className="mono text-[10px] uppercase tracking-wider">Närmar sig</div></div>
+            <div className="hand font-bold text-4xl">{counts.narmar}</div>
+            <div className="hand text-[12px] text-[var(--ink-mute)]">inom 30 dagar</div>
+          </div>
+          <div className="ink-box p-4" style={{background: colorful ? '#fbe4e4' : '#fff'}}>
+            <div className="flex items-center gap-1.5"><StatusDot s="off"/><div className="mono text-[10px] uppercase tracking-wider">Avställda</div></div>
+            <div className="hand font-bold text-4xl">{counts.avstalld}</div>
+            <div className="hand text-[12px] text-[var(--ink-mute)]">ej i trafik</div>
+          </div>
+        </div>
+
+        {/* Section header */}
+        <div className="flex items-end justify-between mb-3">
+          <div>
+            <h2 className="hand font-bold text-2xl">Fordon — sorterade efter brådska</h2>
+            <p className="hand text-[var(--ink-mute)] text-[14px]">Klicka ett fordon för att se åtgärder.</p>
+          </div>
+          <div className="flex gap-2">
+            <button className="ink-btn" style={{fontSize:13}}>Exportera CSV</button>
+            <button className="ink-btn primary" style={{fontSize:13}}>＋ Fordon</button>
+          </div>
+        </div>
+
+        <div className="ink-box overflow-hidden">
+          {/* header row */}
+          <div className="grid grid-cols-[40px_90px_1fr_110px_110px_110px_120px_40px] px-3 py-2 mono text-[11px] text-[var(--ink-mute)] uppercase tracking-wider border-b border-dashed border-black/40 bg-[var(--paper-2)]">
+            <div></div>
+            <div>Regnr</div>
+            <div>Modell</div>
+            <div>Status</div>
+            <div>Besiktning</div>
+            <div>Mätare</div>
+            <div>Nästa</div>
+            <div></div>
+          </div>
+          {sorted.map((v,i) => {
+            const open = v.reg === expandedReg;
+            return (
+              <div key={v.reg} className={`border-b border-black/15 last:border-b-0 ${open?'bg-[var(--paper-2)]':''}`}>
+                <button onClick={()=>setExpandedReg(open ? null : v.reg)}
+                  className="w-full text-left grid grid-cols-[40px_90px_1fr_110px_110px_110px_120px_40px] px-3 py-2.5 items-center hover:bg-[var(--paper-2)]">
+                  <div><VehicleThumb v={v} size={22}/></div>
+                  <div className="mono font-bold tracking-wider text-[14px]">{v.reg}</div>
+                  <div className="hand text-[15px]">{v.model} <span className="text-[var(--ink-mute)]">· {v.year}</span></div>
+                  <div><span className="ink-pill" style={{fontSize:12, padding:'1px 8px',
+                    background: colorful && v.status==='ok' ? '#e8f5ea' : colorful && v.status==='warn' ? '#fdf3d4' : colorful && v.status==='off' ? '#fbe0e0' : '#fff'}}>
+                    <StatusDot s={v.status}/> <span className="ml-1">{STATUS_LABEL[v.status]}</span>
+                  </span></div>
+                  <div className="mono text-[13px]">{v.besiktning}</div>
+                  <div className="mono text-[13px]">{v.km.toLocaleString('sv-SE')} km</div>
+                  <div className="hand text-[13.5px]">{v.nextEvent}</div>
+                  <div className="hand text-[var(--ink-mute)]">{open?'▾':'▸'}</div>
+                </button>
+                {open && (
+                  <div className="px-4 pb-4 pt-1">
+                    <div className="grid grid-cols-[220px_1fr] gap-4">
+                      <div className="ink-box-soft p-3 bg-white flex flex-col items-center">
+                        <VehicleThumb v={v} size={60}/>
+                        <div className="mono text-[12px] mt-2 text-[var(--ink-mute)]">{v.dept}</div>
+                        <div className="hand text-[14px]">Förare: <b>{v.driver}</b></div>
+                      </div>
+                      <div>
+                        <div className="grid grid-cols-4 gap-2">
+                          {FUNCTIONS.slice(0,8).map(f => <FunctionTile key={f.k} f={f} colorful={colorful}/>)}
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                          <button className="ink-btn primary" style={{fontSize:13}}>Öppna fordons-arbetsyta →</button>
+                          <button className="ink-btn" style={{fontSize:13}}>Snabbåtgärd: boka besiktning</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   OPTION D — "Garage" metaphor: carousel of silhouettes + function wall
+   ============================================================ */
+function OptionD({ colorful }) {
+  const [pickedIdx, setPickedIdx] = useState(1);
+  const picked = VEHICLES[pickedIdx];
+
+  return (
+    <div className="paper-plain min-h-[800px]">
+      <SketchHeader/>
+      <div className="max-w-[1180px] mx-auto px-6 py-6">
+        <div className="flex items-end justify-between mb-4">
+          <div>
+            <h1 className="hand font-bold text-3xl">Garaget</h1>
+            <p className="hand text-[var(--ink-mute)] text-[15px]">Scrolla genom flottan. Valt fordon visas nedan.</p>
+          </div>
+          <div className="flex gap-2">
+            <button className="ink-btn" style={{fontSize:13}}>Lista-vy</button>
+            <button className="ink-btn primary" style={{fontSize:13}}>＋ Fordon</button>
+          </div>
+        </div>
+
+        {/* Carousel — horizontal scroll of thumbs */}
+        <div className="ink-box px-3 py-4 mb-6 overflow-x-auto">
+          <div className="flex gap-3 items-end" style={{minWidth:'max-content'}}>
+            {VEHICLES.map((v,i) => {
+              const active = i === pickedIdx;
+              return (
+                <button key={v.reg} onClick={()=>setPickedIdx(i)}
+                  className="flex flex-col items-center gap-1.5 px-3 py-2 rounded-md wobble"
+                  style={{
+                    background: active ? 'var(--ink)' : 'transparent',
+                    color: active ? 'var(--paper)' : 'var(--ink)',
+                    border: active ? '1.5px solid var(--ink)' : '1.5px dashed rgba(0,0,0,0.25)',
+                    minWidth: 120,
+                  }}>
+                  <div className="relative">
+                    <VehicleThumb v={v} size={active? 56 : 44}/>
+                    <span className={`dot ${v.status==='ok'?'ok':v.status==='warn'?'warn':'off'} absolute -top-1 -right-1`} style={{borderColor: active?'var(--paper)':'var(--ink)'}}></span>
+                  </div>
+                  <div className="mono text-[12.5px] font-bold tracking-wider">{v.reg}</div>
+                  <div className="hand text-[12px] text-center" style={{opacity: active ? 0.85 : 0.65, maxWidth:110}}>{v.model}</div>
+                </button>
+              );
+            })}
+            {/* add slot */}
+            <button className="flex flex-col items-center justify-center border-[1.5px] border-dashed border-black/40 rounded-md px-3 min-width-[110px]" style={{minWidth:110}}>
+              <div className="text-3xl hand">＋</div>
+              <div className="hand text-[12px]">nytt</div>
+            </button>
+          </div>
+        </div>
+
+        {/* Picked vehicle banner */}
+        <div className="grid grid-cols-[380px_1fr] gap-6 mb-6">
+          <div className="ink-box p-4 relative bg-[var(--paper-2)]">
+            <div className="tape" style={{top:-6, right:16}}></div>
+            <div className="flex items-center justify-center py-2">
+              <img src={`assets/vehicles/${picked.type}.svg`} alt="" className="silhouette-big" style={{width:260, height:130, objectFit:'contain'}}/>
+            </div>
+            <div className="text-center">
+              <div className="mono text-2xl font-bold tracking-wider">{picked.reg}</div>
+              <div className="hand text-[var(--ink-soft)]">{picked.model}</div>
+            </div>
+          </div>
+          <div>
+            <div className="flex flex-wrap gap-2 mb-3">
+              <span className="ink-pill" style={{background: colorful && picked.status==='ok' ? '#e8f5ea' : colorful && picked.status==='warn' ? '#fdf3d4' : '#fbe0e0'}}>
+                <StatusDot s={picked.status}/> <span className="ml-1">{STATUS_LABEL[picked.status]}</span>
+              </span>
+              <span className="ink-pill">{picked.dept}</span>
+              <span className="ink-pill">{picked.year}</span>
+              <span className="ink-pill">{picked.km.toLocaleString('sv-SE')} km</span>
+              <span className="ink-pill">Förare: {picked.driver}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="ink-box-soft p-3">
+                <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">Besiktning</div>
+                <div className="hand font-bold text-lg mono">{picked.besiktning}</div>
+              </div>
+              <div className="ink-box-soft p-3">
+                <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">Försäkring</div>
+                <div className="hand font-bold text-lg">If Skade — aktiv</div>
+              </div>
+              <div className="ink-box-soft p-3">
+                <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">Nästa händelse</div>
+                <div className="hand font-bold text-lg">{picked.nextEvent}</div>
+              </div>
+            </div>
+            <div className="mt-4 sticky-note inline-block">
+              "Pick-a-vehicle" = en tydlig bil i fokus, allt runt om är dess verktyg.
+            </div>
+          </div>
+        </div>
+
+        {/* Function wall */}
+        <h2 className="hand font-bold text-2xl mb-3">Funktioner för <span className="mono">{picked.reg}</span></h2>
+        <div className="grid grid-cols-4 gap-3">
+          {FUNCTIONS.map(f => <FunctionTile key={f.k} f={f} colorful={colorful}/>)}
+        </div>
+
+        {/* legend scribble */}
+        <div className="mt-8 flex items-center gap-6 hand text-[14px] text-[var(--ink-mute)]">
+          <div className="flex items-center gap-2"><StatusDot s="ok"/> Itrafik / ok</div>
+          <div className="flex items-center gap-2"><StatusDot s="warn"/> Inom 30 dagar</div>
+          <div className="flex items-center gap-2"><StatusDot s="off"/> Avställd</div>
+          <div className="ml-auto mono text-[11px]">data: Transportstyrelsen</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   APP SHELL — tabs switch between 4 wireframe options
+   ============================================================ */
+function App() {
+  const [tweaks, setTweaks] = useState(() => {
+    const stored = (typeof TWEAK_DEFAULS !== 'undefined') ? TWEAK_DEFAULS : {};
+    return { ...stored };
+  });
+  const [option, setOption] = useState(tweaks.defaultOption || 'A');
+  const [editMode, setEditMode] = useState(false);
+
+  // tweaks host protocol
+  useEffect(() => {
+    function onMsg(e) {
+      if (e.data?.type === '__activate_edit_mode') setEditMode(true);
+      if (e.data?.type === '__deactivate_edit_mode') setEditMode(false);
+    }
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({type:'__edit_mode_available'}, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  function updateTweak(k, v) {
+    setTweaks(t => {
+      const next = { ...t, [k]: v };
+      window.parent.postMessage({type:'__edit_mode_set_keys', edits: { [k]: v }}, '*');
+      return next;
+    });
+  }
+
+  // Apply body class for paper bg variant
+  useEffect(() => {
+    document.body.classList.toggle('no-rules', tweaks.paperBg === 'plain');
+    if (tweaks.paperBg === 'plain') {
+      document.documentElement.style.setProperty('--paper', '#fdfcf7');
+    } else {
+      document.documentElement.style.setProperty('--paper', '#fbfaf5');
+    }
+    // font switch
+    const map = { kalam:'Kalam', patrick:'Patrick Hand', caveat:'Caveat' };
+    const fam = map[tweaks.fontFamily] || 'Kalam';
+    document.documentElement.style.setProperty('--hand-font', fam);
+  }, [tweaks]);
+
+  const options = {
+    A: { label:'A · Grid + drawer',     blurb:'Visuellt register, klicka → låda' },
+    B: { label:'B · Fleet Dashboard',     blurb:'Topbar KPIs · larmstyrning · karta → fordon' },
+    C: { label:'C · Flotthälsa-hub',    blurb:'Brådskande först, inline-utvik' },
+    D: { label:'D · Garage-metafor',    blurb:'Karusell + funktionsvägg' },
+  };
+
+  return (
+    <div style={{fontFamily: `"${ {kalam:'Kalam', patrick:'Patrick Hand', caveat:'Caveat'}[tweaks.fontFamily] || 'Kalam'}", cursive`}}>
+      {/* Tabs strip */}
+      <div className="sticky top-0 z-50 bg-[var(--paper-2)] border-b-[1.5px] border-black">
+        <div className="max-w-[1180px] mx-auto px-6 pt-3 flex items-end gap-2 flex-wrap">
+          <div className="hand font-bold text-lg mr-3 whitespace-nowrap">Wireframes:</div>
+          {Object.entries(options).map(([k,o])=>(
+            <button key={k} className={`tab ${option===k ? 'active' : ''}`} onClick={()=>setOption(k)}>
+              {o.label}
+            </button>
+          ))}
+          <div className="ml-auto hand text-[13px] text-[var(--ink-mute)] pb-2 whitespace-nowrap">{options[option].blurb}</div>
+        </div>
+      </div>
+
+      {option === 'A' && <OptionA colorful={tweaks.showColorTouches} showTape={tweaks.showTape}/>}
+      {option === 'B' && <OptionB colorful={tweaks.showColorTouches}/>}
+      {option === 'C' && <OptionC colorful={tweaks.showColorTouches}/>}
+      {option === 'D' && <OptionD colorful={tweaks.showColorTouches}/>}
+
+      {/* footer notes row */}
+      <div className="max-w-[1180px] mx-auto px-6 py-8 border-t border-dashed border-black/40">
+        <div className="flex flex-wrap items-start gap-4">
+          <div className="sticky-note" style={{maxWidth:280}}>
+            Alla 4 alternativ använder samma data & funktionsset — bara sättet att <i>välja ett fordon</i> och öppna dess verktyg skiljer sig.
+          </div>
+          <div className="sticky-note" style={{maxWidth:280, transform:'rotate(1.4deg)', background:'#caf0c4'}}>
+            Nästa: rita ut <b>en specifik funktion</b> (t.ex. Besiktning) i hi-fi för det vinnande alternativet.
+          </div>
+          <div className="sticky-note" style={{maxWidth:280, transform:'rotate(-0.6deg)', background:'#ffd7c2'}}>
+            Behåll "gooey search"-knappen som brand-moment i alla alt. (se vehicle_list.ex).
+          </div>
+        </div>
+      </div>
+
+      {/* Tweaks panel */}
+      {editMode && (
+        <div className="tweaks">
+          <h4 className="hand">Tweaks</h4>
+          <div className="tweak-row">
+            <label>Papper</label>
+            <select value={tweaks.paperBg} onChange={e=>updateTweak('paperBg', e.target.value)}>
+              <option value="ruled">linjerat</option>
+              <option value="plain">slätt</option>
+            </select>
+          </div>
+          <div className="tweak-row">
+            <label>Handstil</label>
+            <select value={tweaks.fontFamily} onChange={e=>updateTweak('fontFamily', e.target.value)}>
+              <option value="kalam">Kalam</option>
+              <option value="patrick">Patrick Hand</option>
+              <option value="caveat">Caveat</option>
+            </select>
+          </div>
+          <div className="tweak-row">
+            <label>Färgstänk</label>
+            <input type="checkbox" checked={tweaks.showColorTouches} onChange={e=>updateTweak('showColorTouches', e.target.checked)}/>
+          </div>
+          <div className="tweak-row">
+            <label>Maskeringstejp</label>
+            <input type="checkbox" checked={tweaks.showTape} onChange={e=>updateTweak('showTape', e.target.checked)}/>
+          </div>
+          <div className="tweak-row">
+            <label>Startar på</label>
+            <select value={tweaks.defaultOption} onChange={e=>updateTweak('defaultOption', e.target.value)}>
+              <option>A</option><option>B</option><option>C</option><option>D</option>
+            </select>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,304 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 850" font-family="Arial, Helvetica, sans-serif">
+  
+  <rect width="600" height="850" fill="#f7f6f2" rx="3"></rect>
+  <rect x="1" y="1" width="598" height="848" fill="none" stroke="#ccc" stroke-width="1" rx="3"></rect>
+
+  
+  
+  
+  <rect x="12" y="12" width="576" height="5" fill="#003d7a" rx="1"></rect>
+
+  
+  <g transform="translate(20, 28)">
+    <rect width="34" height="34" fill="#003d7a" rx="3"></rect>
+    <path d="M7 17 L17 7 L27 17 M17 7 L17 30" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+    <text x="42" y="14" font-size="14" font-weight="bold" fill="#003d7a">TRANSPORT</text>
+    <text x="42" y="30" font-size="14" font-weight="bold" fill="#003d7a">STYRELSEN</text>
+  </g>
+
+  
+  <g transform="translate(310, 28)">
+    <circle cx="16" cy="16" r="15" fill="#003399" stroke="#daa520" stroke-width="1.2"></circle>
+    <g fill="#ffcc00" font-size="5" text-anchor="middle">
+      <text x="16" y="8">★</text>
+      <text x="9" y="12">★</text>
+      <text x="23" y="12">★</text>
+      <text x="7" y="19">★</text>
+      <text x="25" y="19">★</text>
+      <text x="9" y="26">★</text>
+      <text x="23" y="26">★</text>
+      <text x="16" y="30">★</text>
+    </g>
+    <text x="36" y="14" font-size="7" fill="#666">SVERIGE</text>
+  </g>
+
+  
+  <text x="575" y="38" font-size="7" fill="#999" text-anchor="end">UTSKRIFTSDATUM</text>
+  <rect x="490" y="42" width="95" height="16" fill="#eee" stroke="#ccc" stroke-width="0.5" rx="1"></rect>
+  <text x="537" y="54" font-size="8" fill="#555" text-anchor="middle">1038046478</text>
+
+  
+  
+  
+  <text x="20" y="82" font-size="13" font-weight="bold" fill="#222">Del 1 av registreringsbeviset</text>
+  <line x1="12" y1="90" x2="588" y2="90" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  
+  
+  <text x="20" y="104" font-size="6.5" fill="#999">Registreringsbevisinnehavare</text>
+  <text x="20" y="120" font-size="11" fill="#333">Hälge Kalles Sjöäkeriepensad AB</text>
+  <text x="20" y="135" font-size="9" fill="#555">Bruksvägen 25</text>
+  <text x="20" y="150" font-size="9" fill="#555">833 40 Köpmanbotten</text>
+
+  
+  <rect x="460" y="95" width="125" height="55" fill="none" stroke="#bbb" stroke-width="0.5" stroke-dasharray="4,2"></rect>
+  <text x="522" y="120" font-size="7" fill="#ccc" text-anchor="middle">Plats för</text>
+  <text x="522" y="132" font-size="7" fill="#ccc" text-anchor="middle">prövningsmärke</text>
+
+  <text x="20" y="170" font-size="7" fill="#777" font-style="italic">Registreringsbevisets innehavare är ägare till fordonet</text>
+  <text x="20" y="184" font-size="6" fill="#aaa">Nedan: uppgifter om registrering, första reg.datum, kontrollbesiktning m.m.</text>
+
+  <line x1="12" y1="192" x2="588" y2="192" stroke="#bbb" stroke-width="0.5"></line>
+
+  
+  
+  
+  <rect x="12" y="198" width="576" height="60" fill="#eef2f7" rx="2"></rect>
+
+  
+  <line x1="185" y1="198" x2="185" y2="258" stroke="#ccc" stroke-width="0.5"></line>
+  <line x1="310" y1="198" x2="310" y2="258" stroke="#ccc" stroke-width="0.5"></line>
+  <line x1="450" y1="198" x2="450" y2="258" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  <text x="22" y="212" font-size="6.5" fill="#888">A  Registreringsnummer</text>
+  <text x="22" y="245" font-size="26" font-weight="bold" fill="#003d7a" letter-spacing="4">SEY 223</text>
+
+  
+  <text x="195" y="212" font-size="6.5" fill="#888">Behörighetskod</text>
+  <text x="195" y="245" font-size="24" font-weight="bold" fill="#222" letter-spacing="3">49201</text>
+
+  
+  <text x="320" y="212" font-size="6.5" fill="#888">I  Första registrering</text>
+  <text x="320" y="238" font-size="12" fill="#333">2001-08-23</text>
+
+  
+  <text x="460" y="212" font-size="6.5" fill="#888">Identifieringsnummer</text>
+  <text x="460" y="238" font-size="10" fill="#333">1808289740</text>
+
+  
+  
+  
+  <line x1="12" y1="263" x2="588" y2="263" stroke="#ccc" stroke-width="0.5"></line>
+
+  <text x="22" y="278" font-size="6.5" fill="#888">Senaste ägarbyte</text>
+  <text x="22" y="293" font-size="10" fill="#333">2021-06-07</text>
+
+  <text x="150" y="278" font-size="6.5" fill="#888">Bevis utfärdat</text>
+  <text x="150" y="293" font-size="10" fill="#333">2021-06-21</text>
+
+  
+  <rect x="400" y="268" width="185" height="35" fill="none" stroke="#ccc" stroke-width="0.5" rx="2"></rect>
+  <text x="410" y="281" font-size="7" font-weight="bold" fill="#555">Transportstyrelsen</text>
+  <text x="410" y="292" font-size="7" fill="#666">SE-701 81 Örebro, Sverige</text>
+
+  
+  
+  
+  <line x1="12" y1="308" x2="588" y2="308" stroke="#999" stroke-width="0.8"></line>
+  <rect x="12" y="312" width="576" height="20" fill="#fef9e7" rx="2"></rect>
+  <text x="22" y="326" font-size="7.5" font-weight="bold" fill="#92700c">OBS! Medtag detta registreringsbevis i fordonet vid färd bland stämpelmärkts</text>
+  <line x1="12" y1="336" x2="588" y2="336" stroke="#999" stroke-width="0.8"></line>
+
+  
+  
+  
+  <text x="300" y="354" font-size="10" font-weight="bold" fill="#222" text-anchor="middle">Fordonsidentitet och kaross</text>
+  <line x1="12" y1="362" x2="588" y2="362" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  <line x1="145" y1="362" x2="145" y2="398" stroke="#ccc" stroke-width="0.5"></line>
+  <line x1="300" y1="362" x2="300" y2="398" stroke="#ccc" stroke-width="0.5"></line>
+  <line x1="450" y1="362" x2="450" y2="398" stroke="#ccc" stroke-width="0.5"></line>
+
+  <text x="22" y="375" font-size="6.5" fill="#888">Registreringsnummer</text>
+  <text x="22" y="392" font-size="10" font-weight="bold" fill="#333">SEY 223</text>
+
+  <text x="155" y="375" font-size="6.5" fill="#888">Fordonsslag</text>
+  <text x="155" y="392" font-size="9" fill="#333">Lastbil (N3)</text>
+
+  <text x="310" y="375" font-size="6.5" fill="#888">Karosserikod</text>
+  <text x="310" y="392" font-size="9" fill="#333">BA Lastbil</text>
+
+  <text x="460" y="375" font-size="6.5" fill="#888">Antal passagerare</text>
+  <text x="460" y="392" font-size="9" fill="#333">2</text>
+
+  <line x1="12" y1="398" x2="588" y2="398" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  <line x1="145" y1="398" x2="145" y2="432" stroke="#ccc" stroke-width="0.5"></line>
+  <line x1="300" y1="398" x2="300" y2="432" stroke="#ccc" stroke-width="0.5"></line>
+
+  <text x="22" y="412" font-size="6.5" fill="#888">Årsmodell</text>
+  <text x="22" y="426" font-size="9" fill="#333">2001</text>
+
+  <text x="155" y="412" font-size="6.5" fill="#888">Antal axlar</text>
+  <text x="155" y="426" font-size="9" fill="#333">02 Flerdelamurar</text>
+
+  <line x1="12" y1="432" x2="588" y2="432" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  <line x1="300" y1="432" x2="300" y2="466" stroke="#ccc" stroke-width="0.5"></line>
+
+  <text x="22" y="446" font-size="6.5" fill="#888">Identifieringsnummer</text>
+  <text x="22" y="460" font-size="8" fill="#333">YK2F6X3005127D808</text>
+
+  <text x="310" y="446" font-size="6.5" fill="#888">Fabrikat / Typ</text>
+  <text x="310" y="460" font-size="9" fill="#333">Scania P94Gdb02*4na330</text>
+
+  <line x1="12" y1="466" x2="588" y2="466" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  <line x1="145" y1="466" x2="145" y2="502" stroke="#ccc" stroke-width="0.5"></line>
+  <line x1="300" y1="466" x2="300" y2="502" stroke="#ccc" stroke-width="0.5"></line>
+  <line x1="450" y1="466" x2="450" y2="502" stroke="#ccc" stroke-width="0.5"></line>
+
+  <text x="22" y="480" font-size="6.5" fill="#888">Drivmedel</text>
+  <text x="22" y="496" font-size="9" fill="#333">Flerfaningsdel</text>
+
+  <text x="155" y="480" font-size="6.5" fill="#888">Motoreffekt, kW</text>
+  <text x="155" y="496" font-size="9" fill="#333">11500</text>
+
+  <text x="310" y="480" font-size="6.5" fill="#888">Slagvolym, cm³</text>
+  <text x="310" y="496" font-size="9" fill="#333">7000</text>
+
+  <text x="460" y="480" font-size="6.5" fill="#888">Cylindrar</text>
+  <text x="460" y="496" font-size="9" fill="#333">5</text>
+
+  
+  
+  
+  <rect x="12" y="506" width="576" height="4" fill="#c0392b" rx="1"></rect>
+
+  <text x="300" y="525" font-size="10" font-weight="bold" fill="#222" text-anchor="middle">Vikter</text>
+
+  
+  <rect x="12" y="532" width="576" height="16" fill="#e0e0e0" rx="1"></rect>
+  <line x1="155" y1="532" x2="155" y2="548" stroke="#bbb" stroke-width="0.5"></line>
+  <line x1="300" y1="532" x2="300" y2="548" stroke="#bbb" stroke-width="0.5"></line>
+  <line x1="450" y1="532" x2="450" y2="548" stroke="#bbb" stroke-width="0.5"></line>
+
+  <text x="22" y="543" font-size="6.5" font-weight="bold" fill="#555">Tjänstevikt, kg</text>
+  <text x="165" y="543" font-size="6.5" font-weight="bold" fill="#555">F.1 Totalvikt, kg</text>
+  <text x="310" y="543" font-size="6.5" font-weight="bold" fill="#555">P.6 Grundrad totalvikt, kg</text>
+  <text x="460" y="543" font-size="6.5" font-weight="bold" fill="#555">F.1 Högsta totalvikt</text>
+
+  
+  <line x1="155" y1="548" x2="155" y2="572" stroke="#ccc" stroke-width="0.5"></line>
+  <line x1="300" y1="548" x2="300" y2="572" stroke="#ccc" stroke-width="0.5"></line>
+  <line x1="450" y1="548" x2="450" y2="572" stroke="#ccc" stroke-width="0.5"></line>
+
+  <text x="22" y="565" font-size="10" fill="#333">16045</text>
+  <text x="165" y="565" font-size="10" fill="#333">28000</text>
+  <text x="310" y="565" font-size="10" fill="#333">9000 → 27000</text>
+  <text x="460" y="565" font-size="10" fill="#333">—</text>
+
+  <line x1="12" y1="572" x2="588" y2="572" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  <line x1="155" y1="572" x2="155" y2="598" stroke="#ccc" stroke-width="0.5"></line>
+  <line x1="300" y1="572" x2="300" y2="598" stroke="#ccc" stroke-width="0.5"></line>
+
+  <text x="22" y="585" font-size="6.5" fill="#888">Max lastvikt</text>
+  <text x="22" y="596" font-size="9" fill="#333">28000</text>
+
+  <text x="165" y="585" font-size="6.5" fill="#888">Kopplingstryck</text>
+  <text x="165" y="596" font-size="9" fill="#333">11045</text>
+
+  
+  
+  
+  <rect x="12" y="602" width="576" height="4" fill="#c0392b" rx="1"></rect>
+
+  
+  <line x1="300" y1="610" x2="300" y2="676" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  <text x="22" y="624" font-size="9" font-weight="bold" fill="#222">Motor och växellåda</text>
+  <line x1="12" y1="630" x2="298" y2="630" stroke="#ccc" stroke-width="0.5"></line>
+
+  <text x="22" y="644" font-size="6.5" fill="#888">Utsläppsklass</text>
+  <text x="22" y="658" font-size="9" fill="#333">221 B EG</text>
+
+  <text x="155" y="644" font-size="6.5" fill="#888">Antal växlar</text>
+  <text x="155" y="658" font-size="9" fill="#333">3</text>
+  <line x1="145" y1="630" x2="145" y2="676" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  <text x="310" y="624" font-size="9" font-weight="bold" fill="#222">Axlar och hjul</text>
+  <line x1="302" y1="630" x2="588" y2="630" stroke="#ccc" stroke-width="0.5"></line>
+
+  <text x="310" y="644" font-size="6.5" fill="#888">Axelavstånd</text>
+  <text x="310" y="658" font-size="9" fill="#333">4900 / 1360</text>
+
+  <text x="450" y="644" font-size="6.5" fill="#888">Däckdimension</text>
+  <text x="450" y="658" font-size="9" fill="#333">295/80R22.5</text>
+  <line x1="440" y1="630" x2="440" y2="676" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  
+  
+  <rect x="12" y="680" width="576" height="4" fill="#c0392b" rx="1"></rect>
+
+  
+  <line x1="300" y1="688" x2="300" y2="748" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  <text x="22" y="700" font-size="9" font-weight="bold" fill="#222">Miljödata</text>
+  <line x1="12" y1="706" x2="298" y2="706" stroke="#ccc" stroke-width="0.5"></line>
+
+  <text x="22" y="720" font-size="6.5" fill="#888">Miljöklass</text>
+  <text x="22" y="734" font-size="9" fill="#333">MK3</text>
+
+  <text x="155" y="720" font-size="6.5" fill="#888">CO₂ (g/km)</text>
+  <text x="155" y="734" font-size="9" fill="#333">—</text>
+  <line x1="145" y1="706" x2="145" y2="748" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  <text x="310" y="700" font-size="9" font-weight="bold" fill="#222">Kopplingsanordning</text>
+  <line x1="302" y1="706" x2="588" y2="706" stroke="#ccc" stroke-width="0.5"></line>
+
+  <text x="310" y="720" font-size="6.5" fill="#888">Högsta släpvagnsvikt, kg</text>
+  <text x="310" y="734" font-size="9" fill="#333">24000</text>
+
+  <text x="450" y="720" font-size="6.5" fill="#888">Tågvikt, kg</text>
+  <text x="450" y="734" font-size="9" fill="#333">44000</text>
+  <line x1="440" y1="706" x2="440" y2="748" stroke="#ccc" stroke-width="0.5"></line>
+
+  
+  
+  
+  <line x1="12" y1="752" x2="588" y2="752" stroke="#999" stroke-width="0.8"></line>
+  <text x="300" y="770" font-size="8" font-weight="bold" fill="#555" text-anchor="middle">Övriga uppgifter (tekniska data, dispenser m.m.)</text>
+  <line x1="12" y1="778" x2="588" y2="778" stroke="#ccc" stroke-width="0.5"></line>
+
+  <text x="22" y="795" font-size="6" fill="#aaa">Utökade uppgifter finns på baksidan av registreringsbeviset</text>
+
+  <line x1="12" y1="808" x2="588" y2="808" stroke="#ccc" stroke-width="0.5"></line>
+  <text x="20" y="825" font-size="5.5" fill="#bbb">JURIDISKA UPPGIFTER (TEKNISKA DATA, DISPENSER M.M.) ANGES PÅ BEVARATS BAKSIDA</text>
+
+  
+  
+  
+  
+  <rect x="185" y="198" width="125" height="60" fill="none" stroke="#ef4444" stroke-width="3.5" rx="4"></rect>
+
+  
+  <g transform="translate(190, 178)">
+    <rect x="0" y="0" width="115" height="17" fill="#ef4444" rx="3"></rect>
+    <text x="57" y="12.5" font-size="8.5" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="0.5">BEHÖRIGHETSKOD</text>
+  </g>
+  
+  <polygon points="242,195 248,187 254,195" fill="#ef4444"></polygon>
+</svg>
