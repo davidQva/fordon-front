@@ -313,6 +313,23 @@ const SERVICE_SCHEDULE_E = [
   { interval:'Säsong (apr)',        task:'Sommardäck',             next_km:null,   next_date:'2027-04-15', status:'ok' },
 ];
 
+const DRIVER_PROFILES = {
+  'Maria Lindqvist':   { phone:'+46 70 123 45 67', email:'maria.lindqvist@halmstadakeri.se',    license:'B, BE',  licenseExpiry:'2031-06' },
+  'Johan Ek':          { phone:'+46 70 234 56 78', email:'johan.ek@halmstadakeri.se',            license:'C, CE, D', licenseExpiry:'2028-11' },
+  'Sara Persson':      { phone:'+46 73 345 67 89', email:'sara.persson@halmstadakeri.se',        license:'B',      licenseExpiry:'2033-02' },
+  'Erik Sundberg':     { phone:'+46 70 456 78 90', email:'erik.sundberg@halmstadakeri.se',       license:'B, BE',  licenseExpiry:'2029-08' },
+  'Anna Berg':         { phone:'+46 72 567 89 01', email:'anna.berg@halmstadakeri.se',           license:'B',      licenseExpiry:'2030-04' },
+  'Peter Lund':        { phone:'+46 70 678 90 12', email:'peter.lund@halmstadakeri.se',          license:'D, D1',  licenseExpiry:'2027-09' },
+  'Nils Åberg':        { phone:'+46 73 789 01 23', email:'nils.aberg@halmstadakeri.se',          license:'A, B',   licenseExpiry:'2032-07' },
+  'Lisa Norling':      { phone:'+46 70 890 12 34', email:'lisa.norling@halmstadakeri.se',        license:'B',      licenseExpiry:'2029-11' },
+  'Tobias Hård':       { phone:'+46 70 901 23 45', email:'tobias.hard@halmstadakeri.se',         license:'C, CE',  licenseExpiry:'2026-08' },
+  'Marcus Björk':      { phone:'+46 73 012 34 56', email:'marcus.bjork@halmstadakeri.se',        license:'C',      licenseExpiry:'2027-03' },
+  'Karin Lövgren':     { phone:'+46 70 111 22 33', email:'karin.lovgren@halmstadakeri.se',       license:'B, BE',  licenseExpiry:'2030-10' },
+  'Agneta Söderström': { phone:'+46 72 222 33 44', email:'agneta.soderstrom@halmstadakeri.se',   license:'D',      licenseExpiry:'2025-06' },
+  'Håkan Nilsson':     { phone:'+46 70 333 44 55', email:'hakan.nilsson@halmstadakeri.se',       license:'D, D1',  licenseExpiry:'2024-09' },
+  'Jonas Westman':     { phone:'+46 73 444 55 66', email:'jonas.westman@halmstadakeri.se',       license:'B',      licenseExpiry:'2028-02' },
+};
+
 /* ============================================================
    Shared atoms — all hand-sketch flavoured
    ============================================================ */
@@ -1799,6 +1816,99 @@ function CompliancePanel({ v }) {
   );
 }
 
+function ForarePanel({ v }) {
+  const noDriver = v.driver === '—';
+  const profile  = DRIVER_PROFILES[v.driver];
+  const history  = v.driverHistory || [];
+  const licenseWarn = profile && profile.licenseExpiry < '2027-01';
+  const licenseColor = !profile ? 'var(--ink)' : profile.licenseExpiry < '2026-12' ? 'var(--danger)' : profile.licenseExpiry < '2028-01' ? 'var(--warn)' : 'var(--ink)';
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Nuvarande förare</div>
+        {noDriver ? (
+          <div className="ink-dash p-4 flex items-center justify-between">
+            <div>
+              <div className="hand font-bold text-[17px]">Ingen tilldelad förare</div>
+              <div className="hand text-[13px] text-[var(--ink-mute)]">Fordonet saknar en ansvarig förare</div>
+            </div>
+            <button className="ink-btn primary" style={{fontSize:13}}>Tilldela förare →</button>
+          </div>
+        ) : (
+          <div className="ink-box p-4 flex items-start gap-5">
+            <div className="w-14 h-14 rounded-full border-[1.5px] border-[var(--ink)] flex items-center justify-center bg-[var(--paper-2)] mono font-bold text-lg shrink-0">
+              {v.driver.split(' ').map(n=>n[0]).join('').slice(0,2)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="hand font-bold text-[20px] leading-tight">{v.driver}</div>
+              <div className="hand text-[13px] text-[var(--ink-mute)]">{v.dept} · sedan {v.driverSince}</div>
+              {profile && (
+                <div className="grid grid-cols-2 gap-x-8 gap-y-2 mt-3">
+                  <div>
+                    <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">Telefon</div>
+                    <div className="hand font-bold text-[14px]">{profile.phone}</div>
+                  </div>
+                  <div>
+                    <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">E-post</div>
+                    <div className="hand font-bold text-[14px]">{profile.email}</div>
+                  </div>
+                  <div>
+                    <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">Körkortsklass</div>
+                    <div className="hand font-bold text-[14px]">{profile.license}</div>
+                  </div>
+                  <div>
+                    <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">Körkort giltigt till</div>
+                    <div className="hand font-bold text-[14px]" style={{color: licenseColor}}>
+                      {profile.licenseExpiry}{licenseWarn && <span className="ml-1 text-[11px]">⚠ löper snart ut</span>}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-2 shrink-0">
+              <button className="ink-btn" style={{fontSize:13}}>Byt förare →</button>
+              <button className="ink-btn" style={{fontSize:13}}>Visa körjournal →</button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div>
+        <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Förarhistorik</div>
+        {history.length === 0 ? (
+          <div className="ink-box-soft p-3 bg-[var(--paper-2)]">
+            <div className="hand text-[13px] text-[var(--ink-mute)]">Inga tidigare förare registrerade</div>
+          </div>
+        ) : (
+          <div className="ink-box-soft overflow-hidden">
+            <div className="grid grid-cols-[1fr_1fr_80px] px-3 py-2 mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] border-b border-dashed border-black/30 bg-[var(--paper-2)]">
+              <div>Förare</div><div>Period(er)</div><div>Kontakt</div>
+            </div>
+            {history.map((d, i) => {
+              const p = DRIVER_PROFILES[d.name];
+              return (
+                <div key={i} className="grid grid-cols-[1fr_1fr_80px] px-3 py-2.5 border-b border-black/10 last:border-b-0 items-start">
+                  <div>
+                    <div className="hand font-bold text-[14px]">{d.name}</div>
+                    {d.periods.length > 1 && <div className="hand text-[11px]" style={{color:'var(--warn)'}}>↩ återkom</div>}
+                  </div>
+                  <div className="space-y-0.5">
+                    {d.periods.map((period, j) => (
+                      <div key={j} className="mono text-[12px] text-[var(--ink-soft)]">{period}</div>
+                    ))}
+                  </div>
+                  <div className="mono text-[10px] text-[var(--ink-mute)]">{p ? p.phone.slice(-8) : '—'}</div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* Full vehicle detail for Option E */
 function VehicleDetailE({ v, colorful, redAlerts, orangeAlerts, onBack }) {
   const [tab, setTab]     = useState('översikt');
@@ -1823,6 +1933,7 @@ function VehicleDetailE({ v, colorful, redAlerts, orangeAlerts, onBack }) {
     { id:'körjournal', label:'Körjournal' },
     { id:'besiktning', label:'Besiktning' },
     { id:'service',    label:'Service' },
+    { id:'förare',     label:'Förare' },
     { id:'försäkring', label:'Försäkring' },
     { id:'incidenter', label:'Incidenter' },
     { id:'compliance', label:'Compliance' },
@@ -1952,6 +2063,7 @@ function VehicleDetailE({ v, colorful, redAlerts, orangeAlerts, onBack }) {
           {tab==='körjournal' && <KorjournalPanel v={v}/>}
           {tab==='besiktning' && <BesiktningPanel v={v} colorful={colorful}/>}
           {tab==='service'    && <ServicePanel    v={v}/>}
+          {tab==='förare'     && <ForarePanel     v={v}/>}
           {tab==='incidenter' && <IncidentPanel   v={v} colorful={colorful}/>}
           {tab==='compliance' && <CompliancePanel v={v}/>}
 
