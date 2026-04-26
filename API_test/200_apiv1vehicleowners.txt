@@ -1,0 +1,23 @@
+fungerar på samma sätt som /api/v1/vehicle/owner/{id}.
+Men kan var asvårt att använda pga att ägar returnerar som null. Man vet inte vilket företag/personnr
+bilen bilarna tillhör. Måste hålla koll på vilken ordning som företag/personnr skickas och anta att dom kommer i samma ordning. 
+
+
+
+{
+    "owner": null,
+    "vehicles": [
+      {
+        "regnr": "BYF203",
+.....
+.....
+  "historical_vehicles": []
+  },
+  {
+    "owner": null,
+    "vehicles": [
+      {
+        "regnr": "XWP29K",
+        "vin": "XLWRT222779196585",
+        "name": "Terberg RT 222",
+        "make": "Terberg",

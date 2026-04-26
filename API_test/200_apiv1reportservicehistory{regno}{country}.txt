@@ -1,0 +1,21 @@
+{
+  "vehicle": null,
+  "history": {
+    "events": [
+      {
+        "date": "2019-06-12",
+        "meter": 140,
+        "unit": "km",
+        "provider": "Sweden",
+        "type": "service",
+        "actions": [
+          "C4 CACTUS ECRAN GRAND FROID."
+        ]
+      }
+    ]
+  }
+}
+
+
+Notis: Jag brukar lämnna in på ER Bilkyl AB - AD Bilverkstad i Falkenberg, men har ävan lämnat in på Bendt Bil i Halmstad. 
+Vilka företag/verkstäder uppdaterar denna info?
