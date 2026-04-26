@@ -367,10 +367,11 @@ function Logo() {
 
 function SketchHeader({ onHome, view='fordon', onNav=()=>{} }) {
   const NAV = [
-    { id:'fordon',  label:'Mina fordon' },
-    { id:'kalender',label:'Kalender' },
-    { id:'budget',  label:'Budgettering' },
-    { id:'forare',  label:'Förare' },
+    { id:'fordon',       label:'Mina fordon' },
+    { id:'kalender',     label:'Kalender' },
+    { id:'budget',       label:'Budgettering' },
+    { id:'forare',       label:'Förare' },
+    { id:'installningar',label:'Inställningar' },
   ];
   return (
     <header className="border-b border-dashed border-black/50 bg-[var(--paper)]">
@@ -1879,6 +1880,486 @@ function ForareDashboard() {
 }
 
 /* ============================================================
+   SETTINGS PAGE
+   Owner's control room — configure, not act (Law 2).
+   Three sections: Org identity · Members · Billing.
+   ============================================================ */
+function SettingsPage() {
+  const [role, setRole]               = useState('owner');
+  const [invitePanelOpen, setInvitePanelOpen] = useState(false);
+  const [orgName, setOrgName]         = useState('Halmstad Åkeri AB');
+  const [savedField, setSavedField]   = useState(null);
+  const [incidentVis, setIncidentVis] = useState('own_only');
+  const [language, setLanguage]       = useState('sv');
+  const [timezone, setTimezone]       = useState('Europe/Stockholm');
+  const [dangerZone, setDangerZone]   = useState(null);
+  const [confirmText, setConfirmText] = useState('');
+  const [activeSection, setActiveSection] = useState('identity');
+
+  const [members, setMembers] = useState([
+    { name:'Maria Lindqvist', email:'maria.lindqvist@halmstadakeri.se', role:'admin',  joined:'2023-01-15', lastLogin:'apr 25, 07:39' },
+    { name:'Johan Ek',        email:'johan.ek@halmstadakeri.se',        role:'driver', joined:'2022-09-01', lastLogin:'apr 24, 05:44' },
+    { name:'Erik Sundberg',   email:'erik.sundberg@halmstadakeri.se',   role:'driver', joined:'2022-12-01', lastLogin:'apr 25, 06:55' },
+    { name:'Anna Berg',       email:'anna.berg@halmstadakeri.se',       role:'driver', joined:'2022-04-01', lastLogin:'apr 22, 09:14' },
+    { name:'Peter Lund',      email:'peter.lund@halmstadakeri.se',      role:'driver', joined:'2026-02-01', lastLogin:'apr 25, 05:30' },
+  ]);
+  const [pending, setPending] = useState([
+    { email:'lars.berg@gmail.com',                       role:'driver', sent:'apr 20', expires:'2026-04-27' },
+    { email:'kristina.pettersson@halmstadakeri.se',      role:'admin',  sent:'apr 18', expires:'2026-04-25' },
+  ]);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole,  setInviteRole]  = useState('driver');
+  const [inviteMsg,   setInviteMsg]   = useState('');
+
+  const invoices = [
+    { date:'2026-04-01', desc:'Fordonskollen Pro — april 2026',    amount:'1 590 kr' },
+    { date:'2026-03-01', desc:'Fordonskollen Pro — mars 2026',     amount:'1 590 kr' },
+    { date:'2026-02-01', desc:'Fordonskollen Pro — februari 2026', amount:'1 590 kr' },
+  ];
+
+  function flash(field) { setSavedField(field); setTimeout(() => setSavedField(null), 2000); }
+
+  function handleInvite() {
+    if (!inviteEmail) return;
+    setPending(p => [...p, { email:inviteEmail, role:inviteRole, sent:'apr 26', expires:'maj 3' }]);
+    setInviteEmail(''); setInviteRole('driver'); setInviteMsg('');
+    setInvitePanelOpen(false);
+  }
+
+  const TOC = [
+    { id:'identity', label:'Org-identitet' },
+    { id:'members',  label:'Medlemmar' },
+    { id:'billing',  label:'Fakturering' },
+  ];
+
+  const Saved = ({ field }) => savedField === field
+    ? <span className="mono text-[10px] ml-2" style={{color:'var(--ok)'}}>Sparat ✓</span>
+    : null;
+
+  const FieldLabel = ({ children }) => (
+    <label className="hand text-sm shrink-0 text-[var(--ink-soft)]" style={{width:160}}>{children}</label>
+  );
+
+  return (
+    <div className="max-w-[1180px] mx-auto px-6 py-6">
+
+      {/* ── Wireframe role toggle ── */}
+      <div className="flex items-center gap-2 mb-6 pb-4 border-b border-dashed border-black/20">
+        <span className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] shrink-0">Visa som</span>
+        {[['owner','Ägare'],['admin','Admin']].map(([r,l]) => (
+          <button key={r} onClick={()=>setRole(r)}
+            className={`ink-pill ${role===r?'filled':''}`} style={{fontSize:11}}>{l}</button>
+        ))}
+        <span className="mono text-[10px] text-[var(--ink-mute)] ml-1">— förare ser inte denna sida</span>
+      </div>
+
+      <div className="flex gap-10">
+
+        {/* ── Sticky TOC (Law 2: navigate without losing place) ── */}
+        <div style={{width:148}} className="shrink-0">
+          <div className="sticky top-6">
+            <div className="hand font-bold text-xs mb-3 uppercase tracking-wider text-[var(--ink-mute)]">Inställningar</div>
+            <div className="space-y-0.5">
+              {TOC.filter(s => s.id !== 'billing' || role === 'owner').map(s => (
+                <a key={s.id} href={`#cfg-${s.id}`}
+                  onClick={()=>setActiveSection(s.id)}
+                  className="block hand text-sm py-1.5 px-2 rounded-md transition-colors"
+                  style={{
+                    fontWeight: activeSection===s.id ? 700 : 400,
+                    color: activeSection===s.id ? 'var(--ink)' : 'var(--ink-mute)',
+                    background: activeSection===s.id ? 'var(--paper-2)' : 'transparent',
+                  }}>
+                  {s.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Main content ── */}
+        <div className="flex-1 min-w-0 space-y-12">
+
+          {/* ════ Section 1: Org identity ════ */}
+          <section id="cfg-identity" onClick={()=>setActiveSection('identity')}>
+            <div className="hand font-bold text-lg mb-5 pb-2 border-b border-dashed border-black/30">Org-identitet</div>
+            <div className="space-y-4 max-w-xl">
+
+              {/* Org name */}
+              <div className="flex items-center gap-3">
+                <FieldLabel>Organisationsnamn</FieldLabel>
+                <div className="flex items-center gap-2 flex-1">
+                  <input value={orgName} onChange={e=>setOrgName(e.target.value)}
+                    onBlur={()=>flash('name')}
+                    className="ink-box-soft px-3 py-1.5 hand text-sm flex-1 outline-none bg-white"
+                    style={{fontFamily:'inherit'}}/>
+                  <Saved field="name"/>
+                </div>
+              </div>
+
+              {/* Org nr */}
+              <div className="flex items-center gap-3">
+                <FieldLabel>Org.nr</FieldLabel>
+                <div className="flex items-center gap-2">
+                  <input defaultValue="556789-1234" onBlur={()=>flash('orgnr')}
+                    className="ink-box-soft px-3 py-1.5 hand text-sm outline-none bg-white"
+                    style={{fontFamily:'inherit', width:160}}/>
+                  <Saved field="orgnr"/>
+                </div>
+              </div>
+
+              {/* Timezone */}
+              <div className="flex items-center gap-3">
+                <FieldLabel>Tidszon</FieldLabel>
+                <div className="flex items-center gap-2">
+                  <select value={timezone} onChange={e=>{setTimezone(e.target.value); flash('tz');}}
+                    className="ink-box-soft px-3 py-1.5 hand text-sm outline-none bg-white"
+                    style={{fontFamily:'inherit'}}>
+                    <option value="Europe/Stockholm">Europa/Stockholm (CET+1)</option>
+                    <option value="UTC">UTC</option>
+                  </select>
+                  <Saved field="tz"/>
+                </div>
+              </div>
+
+              {/* Language */}
+              <div className="flex items-center gap-3">
+                <FieldLabel>Språk</FieldLabel>
+                <div className="flex items-center gap-2">
+                  <select value={language} onChange={e=>{setLanguage(e.target.value); flash('lang');}}
+                    className="ink-box-soft px-3 py-1.5 hand text-sm outline-none bg-white"
+                    style={{fontFamily:'inherit'}}>
+                    <option value="sv">Svenska</option>
+                    <option value="en">English</option>
+                  </select>
+                  <Saved field="lang"/>
+                </div>
+              </div>
+
+              {/* Incident visibility — Law 4: teach inline */}
+              <div className="flex items-start gap-3">
+                <FieldLabel>Incidents synlighet</FieldLabel>
+                <div className="space-y-3">
+                  {[
+                    ['own_only',    'Förare ser sina egna rapporter',    'Varje förare ser bara sina egna incidents.'],
+                    ['all_in_org',  'Förare ser alla rapporter i org',   'Alla förare kan se varandras incidents.'],
+                  ].map(([val, label, desc]) => (
+                    <label key={val} className="flex items-start gap-2.5 cursor-pointer"
+                      onClick={()=>{setIncidentVis(val); flash('vis');}}>
+                      <div className="mt-0.5 w-4 h-4 rounded-full border-[1.5px] border-[var(--ink)] flex items-center justify-center shrink-0"
+                        style={{background: incidentVis===val ? 'var(--ink)' : '#fff'}}>
+                        {incidentVis===val && <div style={{width:6,height:6,borderRadius:'50%',background:'var(--paper)'}}/>}
+                      </div>
+                      <div>
+                        <div className="hand text-sm font-bold leading-tight">{label}</div>
+                        <div className="hand text-xs text-[var(--ink-mute)]">{desc}</div>
+                      </div>
+                    </label>
+                  ))}
+                  <Saved field="vis"/>
+                </div>
+              </div>
+
+              {/* URL slug */}
+              <div className="flex items-center gap-3">
+                <FieldLabel>URL-slug</FieldLabel>
+                <div className="flex items-center gap-1.5">
+                  <span className="mono text-xs text-[var(--ink-mute)]">…/org/</span>
+                  <input defaultValue="halmstad-akeri" onBlur={()=>flash('slug')}
+                    className="ink-box-soft px-3 py-1.5 hand text-sm outline-none bg-white"
+                    style={{fontFamily:'inherit', width:160}}/>
+                  <Saved field="slug"/>
+                </div>
+              </div>
+
+            </div>
+
+            {/* ── Danger zone — owner only (Law 9: isolate complexity) ── */}
+            {role === 'owner' && (
+              <div className="mt-8 rounded-lg p-4 border border-dashed" style={{borderColor:'var(--danger)'}}>
+                <div className="hand font-bold text-sm mb-3" style={{color:'var(--danger)'}}>Farozon</div>
+                <div className="flex gap-3">
+                  <button onClick={()=>{ setDangerZone('transfer'); setConfirmText(''); }}
+                    className="ink-btn hand text-sm"
+                    style={{borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)', color:'var(--danger)'}}>
+                    Överlåt ägarskap
+                  </button>
+                  <button onClick={()=>{ setDangerZone('delete'); setConfirmText(''); }}
+                    className="ink-btn hand text-sm"
+                    style={{background:'var(--danger)', color:'#fff', borderColor:'#8b1015', boxShadow:'2px 2px 0 0 #8b1015'}}>
+                    Ta bort organisation
+                  </button>
+                </div>
+
+                {dangerZone && (
+                  <div className="mt-4 ink-box p-4" style={{borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)', background:'#fff8f8'}}>
+                    <div className="hand text-sm mb-2">
+                      {dangerZone==='transfer'
+                        ? 'Skriv organisationsnamnet för att bekräfta överlåtelse:'
+                        : 'Skriv organisationsnamnet för att bekräfta permanent radering:'}
+                    </div>
+                    <input value={confirmText} onChange={e=>setConfirmText(e.target.value)}
+                      placeholder={orgName}
+                      className="ink-box-soft px-3 py-1.5 hand text-sm outline-none bg-white mb-3"
+                      style={{fontFamily:'inherit', width:280}}/>
+                    <div className="flex gap-2">
+                      <button
+                        disabled={confirmText !== orgName}
+                        className="ink-btn hand text-sm"
+                        style={{
+                          background: confirmText===orgName ? (dangerZone==='delete' ? 'var(--danger)' : 'var(--ink)') : '#e5e5e5',
+                          color: confirmText===orgName ? '#fff' : 'var(--ink-mute)',
+                          borderColor: confirmText===orgName ? (dangerZone==='delete' ? '#8b1015' : 'var(--ink)') : '#ccc',
+                          boxShadow: confirmText===orgName ? '2px 2px 0 0 #555' : 'none',
+                          cursor: confirmText===orgName ? 'pointer' : 'not-allowed',
+                        }}>
+                        {dangerZone==='transfer' ? 'Bekräfta överlåtelse' : 'Ta bort permanent'}
+                      </button>
+                      <button onClick={()=>{ setDangerZone(null); setConfirmText(''); }}
+                        className="ink-btn hand text-sm">Avbryt</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+
+          {/* ════ Section 2: Members ════ */}
+          <section id="cfg-members" onClick={()=>setActiveSection('members')}>
+            <div className="flex items-center justify-between mb-5 pb-2 border-b border-dashed border-black/30">
+              <div className="hand font-bold text-lg">Medlemmar</div>
+              {/* Law 6: button opens panel beside the list, not a new page */}
+              <button onClick={()=>setInvitePanelOpen(o=>!o)}
+                className="ink-btn accent hand text-sm">+ Bjud in</button>
+            </div>
+
+            <div className="flex gap-5 items-start">
+              <div className="flex-1 min-w-0 space-y-6">
+
+                {/* Active members */}
+                <div>
+                  <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">
+                    Aktiva ({members.length})
+                  </div>
+                  <div className="ink-box overflow-hidden">
+                    <table className="w-full hand border-collapse" style={{fontSize:13}}>
+                      <thead>
+                        <tr className="border-b border-dashed border-black/20" style={{background:'var(--paper-2)'}}>
+                          {['Namn','E-post','Roll','Gick med','Senast sedd',''].map(h => (
+                            <th key={h} className="text-left px-3 py-2 font-bold mono uppercase tracking-wider text-[var(--ink-mute)]"
+                              style={{fontSize:10}}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {members.map(m => (
+                          <tr key={m.email} className="border-b border-dashed border-black/10 hover:bg-[var(--paper-2)] transition-colors">
+                            <td className="px-3 py-2 font-bold">{m.name}</td>
+                            <td className="px-3 py-2 mono text-[11px] text-[var(--ink-mute)]">{m.email}</td>
+                            <td className="px-3 py-2">
+                              <span className="ink-pill" style={{fontSize:10,
+                                background: m.role==='owner' ? 'var(--ink)' : m.role==='admin' ? 'var(--paper-2)' : '#fff',
+                                color: m.role==='owner' ? 'var(--paper)' : 'var(--ink)'}}>
+                                {m.role==='owner' ? 'Ägare' : m.role==='admin' ? 'Admin' : 'Förare'}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 mono text-[11px] text-[var(--ink-mute)]">{m.joined}</td>
+                            <td className="px-3 py-2 mono text-[11px] text-[var(--ink-mute)]">{m.lastLogin}</td>
+                            <td className="px-3 py-2">
+                              {m.role !== 'owner' && (
+                                <div className="flex gap-3">
+                                  <button className="hand text-xs text-[var(--ink-mute)] hover:text-[var(--ink)]">Byt roll</button>
+                                  <button className="hand text-xs text-[var(--ink-mute)] hover:text-[var(--danger)]"
+                                    onClick={()=>setMembers(ms=>ms.filter(mm=>mm.email!==m.email))}>
+                                    Ta bort
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Pending invitations */}
+                <div>
+                  <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">
+                    Väntande inbjudningar ({pending.length})
+                  </div>
+                  <div className="ink-box overflow-hidden">
+                    <table className="w-full hand border-collapse" style={{fontSize:13}}>
+                      <thead>
+                        <tr className="border-b border-dashed border-black/20" style={{background:'var(--paper-2)'}}>
+                          {['E-post','Roll','Skickad','Förfaller',''].map(h => (
+                            <th key={h} className="text-left px-3 py-2 font-bold mono uppercase tracking-wider text-[var(--ink-mute)]"
+                              style={{fontSize:10}}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pending.map(p => {
+                          const expired = p.expires < '2026-04-26';
+                          return (
+                            <tr key={p.email} className="border-b border-dashed border-black/10"
+                              style={{opacity: expired ? 0.5 : 1}}>
+                              <td className="px-3 py-2 mono text-[11px]">{p.email}</td>
+                              <td className="px-3 py-2">
+                                <span className="ink-pill" style={{fontSize:10}}>
+                                  {p.role==='admin' ? 'Admin' : 'Förare'}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2 mono text-[11px] text-[var(--ink-mute)]">{p.sent}</td>
+                              <td className="px-3 py-2 mono text-[11px]"
+                                style={{color: expired ? 'var(--danger)' : 'var(--ink-mute)'}}>
+                                {expired ? 'Förfallen' : p.expires}
+                              </td>
+                              <td className="px-3 py-2">
+                                <div className="flex gap-3">
+                                  <button className="hand text-xs text-[var(--ink-mute)] hover:text-[var(--ink)]">
+                                    {expired ? 'Skicka igen' : 'Påminn'}
+                                  </button>
+                                  <button className="hand text-xs text-[var(--ink-mute)] hover:text-[var(--danger)]"
+                                    onClick={()=>setPending(ps=>ps.filter(pp=>pp.email!==p.email))}>
+                                    Återkalla
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Invite side panel — Law 6: list stays visible ── */}
+              {invitePanelOpen && (
+                <div className="w-64 shrink-0 ink-box p-4 self-start" style={{boxShadow:'3px 3px 0 0 var(--ink)'}}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="hand font-bold">Bjud in ny medlem</div>
+                    <button onClick={()=>setInvitePanelOpen(false)} className="hand text-[var(--ink-mute)] text-sm">✕</button>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="hand text-xs text-[var(--ink-mute)] mb-1">E-postadress *</div>
+                      <input value={inviteEmail} onChange={e=>setInviteEmail(e.target.value)}
+                        placeholder="namn@foretag.se"
+                        className="ink-box-soft px-3 py-1.5 hand text-sm outline-none bg-white w-full"
+                        style={{fontFamily:'inherit'}}/>
+                    </div>
+                    <div>
+                      <div className="hand text-xs text-[var(--ink-mute)] mb-1">Roll</div>
+                      <select value={inviteRole} onChange={e=>setInviteRole(e.target.value)}
+                        className="ink-box-soft px-3 py-1.5 hand text-sm outline-none bg-white w-full"
+                        style={{fontFamily:'inherit'}}>
+                        <option value="driver">Förare</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+                    <div>
+                      <div className="hand text-xs text-[var(--ink-mute)] mb-1">Meddelande (valfritt)</div>
+                      <textarea value={inviteMsg} onChange={e=>setInviteMsg(e.target.value)}
+                        rows={2} placeholder="Välkommen till Halmstad Åkeri!"
+                        className="ink-box-soft px-3 py-1.5 hand text-sm outline-none bg-white w-full resize-none"
+                        style={{fontFamily:'inherit'}}/>
+                    </div>
+                    <button onClick={handleInvite} disabled={!inviteEmail}
+                      className="ink-btn accent w-full text-center hand text-sm"
+                      style={{opacity: inviteEmail ? 1 : 0.4}}>
+                      Skicka inbjudan
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* ════ Section 3: Billing — owner only ════ */}
+          {role === 'owner' ? (
+            <section id="cfg-billing" onClick={()=>setActiveSection('billing')}>
+              <div className="hand font-bold text-lg mb-5 pb-2 border-b border-dashed border-black/30">Fakturering & abonnemang</div>
+
+              {/* Current plan */}
+              <div className="ink-box p-4 mb-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-1">Nuvarande plan</div>
+                    <div className="hand font-bold text-lg">Fordonskollen Pro</div>
+                    <div className="hand text-sm text-[var(--ink-soft)] mt-0.5">
+                      Körjournal · Telematik · Besiktning · Förarbehörighet · Incidents
+                    </div>
+                  </div>
+                  <button className="ink-btn hand text-sm shrink-0 ml-4">Byt plan →</button>
+                </div>
+                <div className="mt-3 pt-3 border-t border-dashed border-black/20 flex gap-8">
+                  {[['Kostnad','1 590 kr/mån'],['Nästa förnyelse','1 maj 2026'],['Fordon','12 / 20']].map(([l,v])=>(
+                    <div key={l}>
+                      <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)]">{l}</div>
+                      <div className="hand font-bold">{v}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Subscription state — Law 5: green = calm, red = urgent */}
+              <div className="ink-box p-4 mb-6 flex items-center gap-3">
+                <span className="dot ok"/>
+                <div className="flex-1">
+                  <div className="hand font-bold text-sm">Aktivt</div>
+                  <div className="hand text-xs text-[var(--ink-mute)]">Senaste betalning: 1 apr 2026 · 1 590 kr</div>
+                </div>
+                <button className="ink-btn hand text-sm">Uppdatera betalmetod</button>
+              </div>
+
+              {/* Invoices */}
+              <div>
+                <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Fakturor</div>
+                <div className="ink-box overflow-hidden">
+                  <table className="w-full hand border-collapse" style={{fontSize:13}}>
+                    <thead>
+                      <tr className="border-b border-dashed border-black/20" style={{background:'var(--paper-2)'}}>
+                        {['Datum','Beskrivning','Belopp',''].map(h=>(
+                          <th key={h} className="text-left px-3 py-2 font-bold mono uppercase tracking-wider text-[var(--ink-mute)]"
+                            style={{fontSize:10}}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {invoices.map((inv,i) => (
+                        <tr key={i} className="border-b border-dashed border-black/10 hover:bg-[var(--paper-2)] transition-colors">
+                          <td className="px-3 py-2 mono text-[11px] text-[var(--ink-mute)]">{inv.date}</td>
+                          <td className="px-3 py-2">{inv.desc}</td>
+                          <td className="px-3 py-2 mono text-[11px] font-bold">{inv.amount}</td>
+                          <td className="px-3 py-2 text-right">
+                            <button className="hand text-xs text-[var(--ink-mute)] hover:text-[var(--ink)]">↓ PDF</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+          ) : (
+            /* Admin sees billing locked state */
+            <section id="cfg-billing" className="ink-dash p-5 flex items-center gap-4">
+              <span style={{fontSize:28}}>§</span>
+              <div>
+                <div className="hand font-bold">Fakturering hanteras av ägaren</div>
+                <div className="hand text-sm text-[var(--ink-mute)]">Kontakta organisationsägaren för att ändra plan eller betalningsuppgifter.</div>
+              </div>
+            </section>
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
    OPTION E — Full Architecture Dashboard
    B structure + all 6 modules + complete .md coverage
    ============================================================ */
@@ -1929,7 +2410,7 @@ function OptionE({ colorful }) {
         onNav={v=>{ setTopView(v); setSelectedReg(null); setAlertPaneOpen(false); }}
         onHome={()=>{ setTopView('fordon'); setSelectedReg(null); setAlertPaneOpen(false); }}/>
 
-      {topView === 'forare' ? <ForareDashboard /> : (<>
+      {topView === 'forare' ? <ForareDashboard /> : topView === 'installningar' ? <SettingsPage /> : (<>
       {/* ─── TOP BAR: 4 KPIs per ARCHITECTURE.md TB1–TB4 ─── */}
       <div className="border-b-[1.5px] border-dashed border-black/40 bg-white">
         <div className="max-w-[1180px] mx-auto px-6 py-3 flex items-center gap-0">
