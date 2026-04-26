@@ -1361,6 +1361,7 @@ function App() {
     B: { label:'B · Fleet Dashboard',     blurb:'Topbar KPIs · larmstyrning · karta → fordon' },
     C: { label:'C · Flotthälsa-hub',    blurb:'Brådskande först, inline-utvik' },
     D: { label:'D · Garage-metafor',    blurb:'Karusell + funktionsvägg' },
+    E: { label:'E · Arkitektur-dashboard', blurb:'Alla 6 moduler · full arkitekturvy', href:'Vehicle Dashboard Wireframes (1).html' },
   };
 
   return (
@@ -1370,9 +1371,9 @@ function App() {
         <div className="max-w-[1180px] mx-auto px-6 pt-3 flex items-end gap-2 flex-wrap">
           <div className="hand font-bold text-lg mr-3 whitespace-nowrap">Wireframes:</div>
           {Object.entries(options).map(([k,o])=>(
-            <button key={k} className={`tab ${option===k ? 'active' : ''}`} onClick={()=>setOption(k)}>
-              {o.label}
-            </button>
+            o.href
+              ? <a key={k} href={o.href} className="tab">{o.label}</a>
+              : <button key={k} className={`tab ${option===k ? 'active' : ''}`} onClick={()=>setOption(k)}>{o.label}</button>
           ))}
           <div className="ml-auto hand text-[13px] text-[var(--ink-mute)] pb-2 whitespace-nowrap">{options[option].blurb}</div>
         </div>
