@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "start": "browser-sync start --server --files '*.html, assets/**' --startPath 'Vehicle Dashboard Wireframes (1).html' --no-notify"
+  },
+  "devDependencies": {
+    "browser-sync": "^3"
+  }
+}
