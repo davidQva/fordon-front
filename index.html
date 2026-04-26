@@ -94,12 +94,6 @@
   .dot.bad  { background: var(--danger); }
   .dot.off  { background: #d9d9d9; }
 
-  /* Rolling nextEvent text */
-  .marquee-wrap { overflow: hidden; max-width: 100%; }
-  .marquee-inner { display: inline-block; white-space: nowrap; animation: marquee 6s linear infinite; }
-  .marquee-inner:hover { animation-play-state: paused; }
-  @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
   /* Underline scribble */
   .scribble { position: relative; }
   .scribble::after{
@@ -274,6 +268,68 @@ const FUNCTIONS = [
 
 const STATUS_LABEL = { ok:'Itrafik', warn:'Närmar sig', off:'Avställd' };
 
+/* ── Option E: extended data ── */
+const ON_ROUTE_REGS = ['DEF 456','YZA 567','MNO 345'];
+
+const TRIPS = [
+  { id:1, reg:'ABC 123', date:'2026-04-24', from:'Industrigatan 12, Halmstad', to:'Lundbyleden 8, Göteborg',       km:142, ecu_km:143, purpose:'',                    type:'tjänst', status:'pending',   on:'07:14', off:'09:38' },
+  { id:2, reg:'ABC 123', date:'2026-04-23', from:'Industrigatan 12, Halmstad', to:'Södervägen 4, Halmstad',        km:8,   ecu_km:8,   purpose:'',                    type:'privat', status:'pending',   on:'17:32', off:'17:51' },
+  { id:3, reg:'ABC 123', date:'2026-04-22', from:'Södervägen 4, Halmstad',     to:'Industrigatan 12, Halmstad',   km:8,   ecu_km:8,   purpose:'Körning till kontoret', type:'tjänst', status:'confirmed', on:'07:58', off:'08:16' },
+  { id:4, reg:'ABC 123', date:'2026-04-21', from:'Industrigatan 12, Halmstad', to:'Hamntorget 2, Helsingborg',    km:98,  ecu_km:98,  purpose:'Kundbesök Schenker',   type:'tjänst', status:'confirmed', on:'08:05', off:'09:48' },
+  { id:5, reg:'ABC 123', date:'2026-04-20', from:'Hamntorget 2, Helsingborg',  to:'Industrigatan 12, Halmstad',  km:97,  ecu_km:97,  purpose:'Hemkörning',           type:'tjänst', status:'confirmed', on:'15:30', off:'17:02' },
+  { id:6, reg:'ABC 123', date:'2026-03-28', from:'Industrigatan 12, Halmstad', to:'Storgatan 44, Malmö',          km:156, ecu_km:157, purpose:'Säljmöte Malmö',       type:'tjänst', status:'attested',  on:'08:30', off:'10:58' },
+  { id:7, reg:'ABC 123', date:'2026-03-14', from:'Södervägen 4, Halmstad',     to:'Industrigatan 12, Halmstad',  km:8,   ecu_km:8,   purpose:'',                    type:'privat', status:'attested',  on:'08:10', off:'08:28' },
+  { id:8, reg:'DEF 456', date:'2026-04-24', from:'Halmstad Åkeri, Halmstad',   to:'DB Schenker, Helsingborg',    km:112, ecu_km:113, purpose:'Leverans gods',        type:'tjänst', status:'confirmed', on:'05:45', off:'07:55' },
+];
+
+const INCIDENTS = [
+  { id:1, reg:'DEF 456', type:'Däckskada',          priority:'high',   status:'open',        date:'2026-04-23', driver:'Johan Ek',        location:'E6 norrut km 143, Laholm',   desc:'Höger framhjul, spik i däck. Bilen är stilla vid avfart Laholm.',     photos:2, steps:['Kontakta vägassistans','Dokumentera skadan','Byt reservhjul om möjligt'] },
+  { id:2, reg:'ABC 123', type:'Vindrutespricka',     priority:'medium', status:'in_progress', date:'2026-04-18', driver:'Maria Lindqvist', location:'Halmstad Åkeri, depå',        desc:'Spricka nedre vänster ca 15 cm. Sannolikt stenskott.',                photos:1, steps:['Beställ reparation','Glasmästare bokad 28 apr'] },
+  { id:3, reg:'STU 901', type:'Motorvarningslampa',  priority:'high',   status:'open',        date:'2026-04-20', driver:'Anna Berg',        location:'Varberg centrum',             desc:'Varningslampa tänd vid start. Bilen kör men känns trög.',              photos:0, steps:['Läs av felkoder','Boka verkstad snarast'] },
+  { id:4, reg:'YZA 567', type:'Repor på sidan',      priority:'low',    status:'resolved',    date:'2026-04-10', driver:'Peter Lund',       location:'Centralstationen, Göteborg',  desc:'Parkeringsskada, repor höger dörr.',                                   photos:3, steps:['Fotograferat','Anmälan gjord','Försäkringsärende öppnat'] },
+];
+
+const ECU_DATA = {
+  'ABC 123': { odometer:42130,  fuel_pct:68, speed:0,  ignition:false, dtcs:[],                                                      hdop:1.2, updated:'07:39' },
+  'DEF 456': { odometer:218400, fuel_pct:22, speed:73, ignition:true,  dtcs:['P0300 – Antändningsfel cyl 1–4'],                      hdop:2.1, updated:'07:41' },
+  'STU 901': { odometer:54320,  fuel_pct:45, speed:0,  ignition:false, dtcs:['P0420 – Katalysator eff låg','P0171 – Syresensor avvikelse'], hdop:1.4, updated:'07:40' },
+  'YZA 567': { odometer:165300, fuel_pct:81, speed:54, ignition:true,  dtcs:[],                                                      hdop:1.8, updated:'07:41' },
+  'MNO 345': { odometer:112050, fuel_pct:55, speed:88, ignition:true,  dtcs:[],                                                      hdop:1.5, updated:'07:42' },
+};
+
+const SERVICE_HISTORY_DATA = {
+  'ABC 123': [
+    { date:'2025-09-14', km:37500, workshop:'Volvo Bil Halmstad',  tasks:['Oljebyte','Luftfilter','Bromskontroll'], cost:3840 },
+    { date:'2024-06-02', km:25000, workshop:'Volvo Bil Halmstad',  tasks:['Oljebyte','Däckrotation'],              cost:2100 },
+    { date:'2023-06-15', km:12500, workshop:'Volvo Bil Halmstad',  tasks:['Oljebyte'],                             cost:1650 },
+  ],
+};
+
+const SERVICE_SCHEDULE_E = [
+  { interval:'25 000 km / 12 mån', task:'Oljebyte & oljefilter',  next_km:50000,  next_date:'2026-09-14', status:'ok' },
+  { interval:'50 000 km / 24 mån', task:'Bromsvätskebyte',        next_km:50000,  next_date:'2026-09-14', status:'due_soon' },
+  { interval:'100 000 km',         task:'Drivremsbyte',           next_km:100000, next_date:'—',          status:'ok' },
+  { interval:'Säsong (okt)',        task:'Vinterdäck',             next_km:null,   next_date:'2026-10-15', status:'ok' },
+  { interval:'Säsong (apr)',        task:'Sommardäck',             next_km:null,   next_date:'2027-04-15', status:'ok' },
+];
+
+const DRIVER_PROFILES = {
+  'Maria Lindqvist':   { phone:'+46 70 123 45 67', email:'maria.lindqvist@halmstadakeri.se',    license:'B, BE',  licenseExpiry:'2031-06' },
+  'Johan Ek':          { phone:'+46 70 234 56 78', email:'johan.ek@halmstadakeri.se',            license:'C, CE, D', licenseExpiry:'2028-11' },
+  'Sara Persson':      { phone:'+46 73 345 67 89', email:'sara.persson@halmstadakeri.se',        license:'B',      licenseExpiry:'2033-02' },
+  'Erik Sundberg':     { phone:'+46 70 456 78 90', email:'erik.sundberg@halmstadakeri.se',       license:'B, BE',  licenseExpiry:'2029-08' },
+  'Anna Berg':         { phone:'+46 72 567 89 01', email:'anna.berg@halmstadakeri.se',           license:'B',      licenseExpiry:'2030-04' },
+  'Peter Lund':        { phone:'+46 70 678 90 12', email:'peter.lund@halmstadakeri.se',          license:'D, D1',  licenseExpiry:'2027-09' },
+  'Nils Åberg':        { phone:'+46 73 789 01 23', email:'nils.aberg@halmstadakeri.se',          license:'A, B',   licenseExpiry:'2032-07' },
+  'Lisa Norling':      { phone:'+46 70 890 12 34', email:'lisa.norling@halmstadakeri.se',        license:'B',      licenseExpiry:'2029-11' },
+  'Tobias Hård':       { phone:'+46 70 901 23 45', email:'tobias.hard@halmstadakeri.se',         license:'C, CE',  licenseExpiry:'2026-08' },
+  'Marcus Björk':      { phone:'+46 73 012 34 56', email:'marcus.bjork@halmstadakeri.se',        license:'C',      licenseExpiry:'2027-03' },
+  'Karin Lövgren':     { phone:'+46 70 111 22 33', email:'karin.lovgren@halmstadakeri.se',       license:'B, BE',  licenseExpiry:'2030-10' },
+  'Agneta Söderström': { phone:'+46 72 222 33 44', email:'agneta.soderstrom@halmstadakeri.se',   license:'D',      licenseExpiry:'2025-06' },
+  'Håkan Nilsson':     { phone:'+46 70 333 44 55', email:'hakan.nilsson@halmstadakeri.se',       license:'D, D1',  licenseExpiry:'2024-09' },
+  'Jonas Westman':     { phone:'+46 73 444 55 66', email:'jonas.westman@halmstadakeri.se',       license:'B',      licenseExpiry:'2028-02' },
+};
+
 /* ============================================================
    Shared atoms — all hand-sketch flavoured
    ============================================================ */
@@ -350,136 +406,6 @@ function FunctionTile({ f, colorful }) {
   );
 }
 
-/* ============================================================
-   OPTION A — Grid of vehicle cards → slide-in detail drawer
-   ============================================================ */
-function OptionA({ colorful, showTape }) {
-  const [picked, setPicked] = useState(null);
-  const [filter, setFilter] = useState('all');
-  const shown = VEHICLES.filter(v => filter==='all' ? true : v.status===filter);
-
-  return (
-    <div className="paper min-h-[800px] relative">
-      <SketchHeader onHome={()=>setPicked(null)}/>
-      <div className="max-w-[1180px] mx-auto px-6 py-8">
-        <div className="flex items-end justify-between mb-5">
-          <div>
-            <h1 className="hand font-bold text-3xl scribble inline-block">Mina fordon</h1>
-            <p className="hand text-[var(--ink-mute)] mt-2 text-[15px]">Välj ett fordon för att öppna dess funktioner.</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="ink-box-soft px-3 py-1.5 flex items-center gap-2">
-              <span className="mono text-xs opacity-70">sök</span>
-              <span className="hand text-sm text-[var(--ink-mute)]">regnr eller modell…</span>
-            </div>
-            <button className="ink-btn primary">＋ Lägg till fordon</button>
-          </div>
-        </div>
-
-        {/* filter pills */}
-        <div className="flex gap-2 mb-5 flex-wrap">
-          {[['all', `Alla ${VEHICLES.length}`], ['ok', `Itrafik ${VEHICLES.filter(v=>v.status==='ok').length}`],
-            ['warn', `Närmar sig ${VEHICLES.filter(v=>v.status==='warn').length}`], ['off', `Avställda ${VEHICLES.filter(v=>v.status==='off').length}`]
-          ].map(([k,l])=>(
-            <button key={k} onClick={()=>setFilter(k)} className={`ink-pill ${filter===k?'filled':''}`}>{l}</button>
-          ))}
-          <div className="ml-auto flex items-center gap-2 hand text-sm text-[var(--ink-mute)]">
-            <span>sortera:</span>
-            <span className="ink-pill" style={{background:'#fff'}}>regnr ▾</span>
-          </div>
-        </div>
-
-        {/* grid */}
-        <div className="grid grid-cols-4 gap-4">
-          {shown.map(v => (
-            <button key={v.reg} onClick={()=>setPicked(v)}
-              className="ink-box p-3 text-left wobble relative bg-white">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="mono text-[17px] font-bold tracking-wider">{v.reg}</div>
-                  <div className="hand text-sm text-[var(--ink-soft)] mt-0.5">{v.model}</div>
-                </div>
-                <div className="flex items-center gap-1 ink-pill" style={{fontSize:11, padding:'1px 6px',
-                  background: colorful && v.status==='ok' ? '#e8f5ea' : colorful && v.status==='warn' ? '#fdf3d4' : colorful && v.status==='off' ? '#fbe0e0' : '#fff'}}>
-                  <StatusDot s={v.status}/><span>{STATUS_LABEL[v.status]}</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-center py-3">
-                <VehicleThumb v={v} size={48}/>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="mono text-[var(--ink-mute)]">{v.year}</span>
-                <span className="mono text-[var(--ink-mute)]">{v.km.toLocaleString('sv-SE')} km</span>
-              </div>
-              <div className="mt-2 pt-2 border-t border-dashed border-black/30 hand text-[12.5px]">
-                <span className="text-[var(--ink-mute)]">nästa: </span>{v.nextEvent}
-              </div>
-            </button>
-          ))}
-          {/* add-card */}
-          <button className="ink-dash flex flex-col items-center justify-center min-h-[180px] wobble">
-            <div className="text-3xl hand">＋</div>
-            <div className="hand text-sm">Lägg till fordon</div>
-            <div className="mono text-[11px] text-[var(--ink-mute)] mt-1">regnr-först flöde</div>
-          </button>
-        </div>
-
-        {showTape && <div className="tape" style={{top:88, left:-8}}></div>}
-      </div>
-
-      {/* Drawer */}
-      {picked && (
-        <div className="fixed inset-0 z-40 bg-black/30 flex justify-end" onClick={()=>setPicked(null)}>
-          <div onClick={e=>e.stopPropagation()}
-            className="h-full bg-[var(--paper)] border-l-2 border-black overflow-y-auto"
-            style={{width:'min(720px, 80vw)'}}>
-            <div className="px-6 py-5 border-b border-dashed border-black/50 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <VehicleThumb v={picked} size={42}/>
-                <div>
-                  <div className="mono text-xl font-bold tracking-wider">{picked.reg}</div>
-                  <div className="hand text-sm text-[var(--ink-soft)]">{picked.model} · {picked.year}</div>
-                </div>
-                <div className="ink-pill ml-3" style={{
-                  background: colorful && picked.status==='ok' ? '#e8f5ea' : colorful && picked.status==='warn' ? '#fdf3d4' : '#fbe0e0'
-                }}>
-                  <StatusDot s={picked.status}/> <span className="ml-1">{STATUS_LABEL[picked.status]}</span>
-                </div>
-              </div>
-              <button onClick={()=>setPicked(null)} className="ink-btn">stäng ✕</button>
-            </div>
-
-            <div className="px-6 py-5">
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                <div className="ink-box-soft p-3">
-                  <div className="mono text-[10px] text-[var(--ink-mute)]">MÄTARSTÄLLNING</div>
-                  <div className="hand text-lg font-bold">{picked.km.toLocaleString('sv-SE')} km</div>
-                </div>
-                <div className="ink-box-soft p-3">
-                  <div className="mono text-[10px] text-[var(--ink-mute)]">FÖRARE</div>
-                  <div className="hand text-lg font-bold">{picked.driver}</div>
-                </div>
-                <div className="ink-box-soft p-3">
-                  <div className="mono text-[10px] text-[var(--ink-mute)]">NÄSTA BESIKTNING</div>
-                  <div className="hand text-lg font-bold mono">{picked.besiktning}</div>
-                </div>
-              </div>
-
-              <div className="hand font-bold text-lg mb-2 scribble inline-block">Funktioner</div>
-              <div className="grid grid-cols-3 gap-3 mt-4">
-                {FUNCTIONS.map(f => <FunctionTile key={f.k} f={f} colorful={colorful}/>)}
-              </div>
-
-              <div className="mt-6 sticky-note inline-block">
-                Tanken: en "workspace" per fordon — allt om <b>{picked.reg}</b> i en låda.
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 /* ============================================================
    OPTION B — Fleet Dashboard map view sub-components
@@ -660,47 +586,598 @@ function DriverExpanded({ driver, driverSince, driverHistory = [] }) {
   );
 }
 
-function VehicleDetail({ v, colorful, redAlerts, orangeAlerts, onBack }) {
-  const [tab, setTab]               = useState('översikt');
-  const [expandedCard, setExpanded] = useState(null); // null | 'driver' | card id
 
-  /* Reset expanded card when switching tabs */
-  function switchTab(t) { setTab(t); setExpanded(null); }
+/* ============================================================
+   OPTION E — sub-components
+   ============================================================ */
 
-  const statusBg = colorful
-    ? (v.status==='ok' ? '#e8f5ea' : v.status==='warn' ? '#fdf3d4' : '#fbe0e0')
-    : '#fff';
+function ModuleGate({ label, reason }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[200px] gap-3">
+      <div className="ink-dash px-6 py-5 text-center">
+        <div className="mono text-[11px] uppercase tracking-wider text-[var(--ink-mute)] mb-1">Modul ej aktiverad</div>
+        <div className="hand font-bold text-lg">{label}</div>
+        <div className="hand text-[13px] text-[var(--ink-mute)] mt-1">{reason}</div>
+        <button className="ink-btn accent mt-3" style={{fontSize:13}}>Aktivera modul →</button>
+      </div>
+    </div>
+  );
+}
+
+function TelematikPanel({ v, colorful }) {
+  const ecu = ECU_DATA[v.reg];
+  if (!ecu) return <ModuleGate label="Telematik (Modul 3)" reason="Fordonet har ingen FMC003-enhet. Trailers och motorredskap stöds ej."/>;
+  const dtcColor = ecu.dtcs.length > 0 ? 'var(--danger)' : 'var(--ok)';
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3 px-4 py-2.5 rounded-md"
+        style={{background: ecu.ignition ? 'rgba(59,157,72,0.08)' : 'rgba(0,0,0,0.04)', border:'1px solid rgba(0,0,0,0.12)'}}>
+        <span className={`dot ${ecu.ignition ? 'ok' : 'off'}`}/>
+        <div className="hand font-bold">{ecu.ignition ? `Tändning PÅ · ${ecu.speed} km/h` : 'Tändning AV · stillastående'}</div>
+        <div className="ml-auto mono text-[11px] text-[var(--ink-mute)]">ECU {ecu.updated} · GPS HDOP {ecu.hdop} · {ecu.hdop < 1.5 ? 'bra signal' : 'ok signal'}</div>
+      </div>
+      <div className="grid grid-cols-4 gap-3">
+        <div className="ink-box-soft p-3">
+          <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">Odometer (ECU)</div>
+          <div className="hand font-bold text-[17px] mt-1">{ecu.odometer.toLocaleString('sv-SE')} km</div>
+          <div className="hand text-[11px] text-[var(--ink-mute)]">juridisk mätarställning</div>
+        </div>
+        <div className="ink-box-soft p-3">
+          <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">Bränslenivå</div>
+          <div className="hand font-bold text-[17px] mt-1">{ecu.fuel_pct} %</div>
+          <div className="flex h-2 bg-[var(--paper-2)] rounded mt-1.5 overflow-hidden">
+            <div style={{width:`${ecu.fuel_pct}%`, background: ecu.fuel_pct < 20 ? 'var(--danger)' : ecu.fuel_pct < 40 ? 'var(--warn)' : 'var(--ok)', transition:'width 0.3s'}}/>
+          </div>
+        </div>
+        <div className="ink-box-soft p-3">
+          <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">Hastighet (ECU)</div>
+          <div className="hand font-bold text-[17px] mt-1">{ecu.speed} km/h</div>
+          <div className="hand text-[11px] text-[var(--ink-mute)]">ej juridisk bevisning</div>
+        </div>
+        <div className="ink-box-soft p-3" style={ecu.dtcs.length > 0 ? {borderColor:'var(--danger)'} : {}}>
+          <div className="mono text-[9px] uppercase tracking-wider" style={{color:dtcColor}}>Felkoder (DTC)</div>
+          <div className="hand font-bold text-[17px] mt-1" style={{color:dtcColor}}>{ecu.dtcs.length === 0 ? 'Inga' : ecu.dtcs.length}</div>
+          <div className="hand text-[11px]" style={{color: ecu.dtcs.length > 0 ? 'var(--danger)' : 'var(--ink-mute)'}}>
+            {ecu.dtcs.length > 0 ? 'aktiva fel' : 'allt ok'}
+          </div>
+        </div>
+      </div>
+      {ecu.dtcs.length > 0 && (
+        <div className="ink-box p-3" style={{borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)', background:'#fff8f8'}}>
+          <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{color:'var(--danger)'}}>Aktiva felkoder — åtgärd rekommenderas</div>
+          {ecu.dtcs.map((dtc,i) => (
+            <div key={i} className="flex items-center gap-2 py-1.5 border-b border-black/10 last:border-0">
+              <span className="dot bad"/>
+              <span className="mono text-[13px] font-bold">{dtc.split(' – ')[0]}</span>
+              <span className="hand text-[13px] text-[var(--ink-soft)]">{dtc.split(' – ')[1]}</span>
+            </div>
+          ))}
+          <button className="ink-btn mt-2" style={{fontSize:12, borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)'}}>Boka verkstad →</button>
+        </div>
+      )}
+      <div className="ink-box-soft p-3 bg-[var(--paper-2)]">
+        <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-1.5">FMC003 datakällor</div>
+        <div className="grid grid-cols-2 gap-1.5 hand text-[12.5px]">
+          <div className="flex items-center gap-1.5"><span style={{color:'var(--ok)'}}>✓</span> ECU-odometer (juridisk körjournal)</div>
+          <div className="flex items-center gap-1.5"><span style={{color:'var(--ok)'}}>✓</span> Bränslenivå (tanksensor ECU)</div>
+          <div className="flex items-center gap-1.5"><span style={{color:'var(--ok)'}}>✓</span> GPS-position (GNSS ±3 m)</div>
+          <div className="flex items-center gap-1.5"><span style={{color:'var(--warn)'}}>~</span> GPS-hastighet (ej juridisk)</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KorjournalPanel({ v }) {
+  const [confirmingId, setConfirmingId] = useState(null);
+  const [purposes, setPurposes] = useState({});
+  const vTrips = TRIPS.filter(t => t.reg === v.reg);
+  const pending   = vTrips.filter(t => t.status === 'pending');
+  const confirmed = vTrips.filter(t => t.status === 'confirmed');
+  const attested  = vTrips.filter(t => t.status === 'attested');
+  const aprilKm   = vTrips.filter(t => t.date.startsWith('2026-04') && t.status !== 'pending').reduce((s,t) => s+t.km, 0);
+  const marchKm   = vTrips.filter(t => t.date.startsWith('2026-03')).reduce((s,t) => s+t.km, 0);
+
+  if (vTrips.length === 0) return (
+    <div className="ink-dash flex flex-col items-center justify-center py-10 gap-2">
+      <div className="hand text-lg font-bold">Inga resor registrerade</div>
+      <div className="hand text-[var(--ink-mute)]">Körjournal aktiveras när fordonet har FMC003 eller manuell inmatning</div>
+      <button className="ink-btn accent mt-2" style={{fontSize:13}}>+ Lägg till resa manuellt</button>
+    </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-3 gap-3">
+        <div className="ink-box p-3" style={{borderColor:'var(--warn)', background:'#fffbee'}}>
+          <div className="mono text-[9px] uppercase tracking-wider" style={{color:'var(--warn)'}}>April 2026 — pågår</div>
+          <div className="hand font-bold text-[18px] mt-1">{aprilKm} km</div>
+          <div className="hand text-[11px] text-[var(--ink-mute)]">{pending.length > 0 ? `${pending.length} resa att bekräfta` : 'alla bekräftade'}</div>
+        </div>
+        <div className="ink-box-soft p-3 bg-[var(--paper-2)]">
+          <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">Mars 2026 — attesterad</div>
+          <div className="hand font-bold text-[18px] mt-1">{marchKm} km</div>
+          <div className="hand text-[11px]" style={{color:'var(--ok)'}}>✓ Attesterad 2026-03-31</div>
+        </div>
+        <div className="ink-box-soft p-3">
+          <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">6-årsarkiv</div>
+          <div className="hand font-bold text-[18px] mt-1">Aktivt</div>
+          <div className="hand text-[11px] text-[var(--ink-mute)]">PDF & CSV export</div>
+        </div>
+      </div>
+
+      {pending.length > 0 && (
+        <div>
+          <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{color:'var(--warn)'}}>Ohanterade resor — bekräfta nu</div>
+          {pending.map(t => (
+            <div key={t.id} className="ink-box p-3 mb-2" style={{borderColor:'var(--warn)', background:'#fffbee'}}>
+              {confirmingId !== t.id ? (
+                <div className="flex items-start gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="mono text-[12px] font-bold">{t.date}</span>
+                      <span className="mono text-[11px] text-[var(--ink-mute)]">{t.on} – {t.off}</span>
+                      <span className="ink-pill" style={{fontSize:10, padding:'1px 7px', background: t.type==='privat'?'#e8f0fe':'#e8f5ea'}}>{t.type} (förslag)</span>
+                    </div>
+                    <div className="hand text-[13px]"><span className="text-[var(--ink-mute)]">Från  </span>{t.from}</div>
+                    <div className="hand text-[13px]"><span className="text-[var(--ink-mute)]">Till    </span>{t.to}</div>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="mono text-[12px]">{t.km} km</span>
+                      <span className="mono text-[11px] text-[var(--ink-mute)]">(ECU: {t.ecu_km} km)</span>
+                    </div>
+                  </div>
+                  <button onClick={()=>setConfirmingId(t.id)} className="ink-btn accent shrink-0" style={{fontSize:13}}>Bekräfta →</button>
+                </div>
+              ) : (
+                <div>
+                  <div className="mono text-[10px] uppercase tracking-wider mb-3" style={{color:'var(--accent)'}}>Bekräfta resa {t.date}</div>
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                      <div className="mono text-[10px] text-[var(--ink-mute)] mb-1">Ärende / uppdrag *</div>
+                      <div className="ink-box-soft p-2 flex items-center">
+                        <input className="flex-1 bg-transparent hand text-sm outline-none"
+                          value={purposes[t.id]||''} onChange={e=>setPurposes(p=>({...p,[t.id]:e.target.value}))}
+                          placeholder="Beskriv ärendet…" style={{fontFamily:'Kalam, cursive'}}/>
+                      </div>
+                      <div className="hand text-[10px] text-[var(--ink-mute)] mt-0.5">Krävs för tjänsteresor (Skatteverket)</div>
+                    </div>
+                    <div>
+                      <div className="mono text-[10px] text-[var(--ink-mute)] mb-1">Klassificering *</div>
+                      <div className="flex gap-2">
+                        <button className="ink-btn" style={{fontSize:13, background: t.type==='tjänst'?'var(--ink)':'#fff', color: t.type==='tjänst'?'var(--paper)':'var(--ink)'}}>Tjänst</button>
+                        <button className="ink-btn" style={{fontSize:13, background: t.type==='privat'?'var(--ink)':'#fff', color: t.type==='privat'?'var(--paper)':'var(--ink)'}}>Privat</button>
+                      </div>
+                      <div className="hand text-[10px] text-[var(--ink-mute)] mt-0.5">Förslag: {t.type} (geofence)</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="ink-btn accent" style={{fontSize:13}}>✓ Spara bekräftelse</button>
+                    <button onClick={()=>setConfirmingId(null)} className="ink-btn" style={{fontSize:13}}>Avbryt</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {confirmed.length > 0 && (
+        <div>
+          <div className="mono text-[10px] uppercase tracking-wider mb-2 text-[var(--ink-mute)]">April 2026 — bekräftade resor</div>
+          <div className="ink-box overflow-hidden">
+            <div className="grid grid-cols-[1fr_70px_80px_1fr_80px] px-3 py-1.5 mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] bg-[var(--paper-2)] border-b border-dashed border-black/30">
+              <div>Rutt</div><div>Km</div><div>Typ</div><div>Ärende</div><div>Tid</div>
+            </div>
+            {confirmed.map(t => (
+              <div key={t.id} className="grid grid-cols-[1fr_70px_80px_1fr_80px] px-3 py-2 items-center border-b border-black/10 last:border-0 hover:bg-[var(--paper-2)]">
+                <div>
+                  <div className="hand text-[13px] truncate">{t.from.split(',')[0]} → {t.to.split(',')[0]}</div>
+                  <div className="mono text-[10px] text-[var(--ink-mute)]">{t.date}</div>
+                </div>
+                <div className="mono text-[13px]">{t.km} km</div>
+                <div><span className="ink-pill" style={{fontSize:10, padding:'1px 7px', background: t.type==='privat'?'#e8f0fe':'#e8f5ea'}}>{t.type}</span></div>
+                <div className="hand text-[12px] truncate">{t.purpose || <span className="text-[var(--ink-mute)] italic">—</span>}</div>
+                <div className="mono text-[11px] text-[var(--ink-mute)]">{t.on}–{t.off}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <div className="hand text-[13px] text-[var(--ink-mute)]">April avslutas 30 apr — attestering öppnas då</div>
+            <button className="ink-btn" style={{fontSize:12, opacity:0.5, cursor:'default'}}>Attestera april →</button>
+          </div>
+        </div>
+      )}
+
+      {attested.length > 0 && (
+        <div>
+          <div className="mono text-[10px] uppercase tracking-wider mb-2 text-[var(--ink-mute)]">Mars 2026 — attesterat arkiv</div>
+          <div className="ink-box-soft overflow-hidden bg-[var(--paper-2)]">
+            {attested.map(t => (
+              <div key={t.id} className="flex items-center gap-3 px-3 py-2 border-b border-black/10 last:border-0">
+                <span className="hand text-[11px]" style={{color:'var(--ok)'}}>✓</span>
+                <div className="flex-1 hand text-[12.5px]">{t.date} · {t.from.split(',')[0]} → {t.to.split(',')[0]}</div>
+                <div className="mono text-[11px] text-[var(--ink-mute)]">{t.km} km · {t.type}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-2 mt-2">
+            <button className="ink-btn" style={{fontSize:12}}>↓ PDF mars</button>
+            <button className="ink-btn" style={{fontSize:12}}>↓ CSV mars</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ServicePanel({ v }) {
+  const history = SERVICE_HISTORY_DATA[v.reg] || [];
+  return (
+    <div className="grid grid-cols-2 gap-5">
+      <div>
+        <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Serviceschema (OEM · Biluppgifter)</div>
+        <div className="ink-box overflow-hidden">
+          {SERVICE_SCHEDULE_E.map((s,i) => (
+            <div key={i} className="flex items-start gap-3 px-3 py-2.5 border-b border-black/10 last:border-0"
+              style={{background: s.status==='due_soon' ? '#fffbee' : 'transparent'}}>
+              <span className={`dot shrink-0 mt-1 ${s.status==='due_soon' ? 'warn' : 'ok'}`}/>
+              <div className="flex-1">
+                <div className="hand font-bold text-[13.5px]">{s.task}</div>
+                <div className="mono text-[10px] text-[var(--ink-mute)]">{s.interval}</div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="hand text-[12px]">{s.next_date}</div>
+                {s.next_km && <div className="mono text-[10px] text-[var(--ink-mute)]">{s.next_km.toLocaleString('sv-SE')} km</div>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Servicehistorik (Biluppgifter)</div>
+        {history.length === 0 ? (
+          <div className="ink-dash flex items-center justify-center h-[120px]">
+            <span className="hand text-[var(--ink-mute)]">Ingen historik registrerad</span>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {history.map((h,i) => (
+              <div key={i} className="ink-box-soft p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="mono text-[12px] font-bold">{h.date}</span>
+                  <span className="mono text-[12px] text-[var(--ink-mute)]">{h.km.toLocaleString('sv-SE')} km</span>
+                </div>
+                <div className="hand text-[13px] text-[var(--ink-soft)]">{h.workshop}</div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {h.tasks.map((t,j) => <span key={j} className="ink-pill" style={{fontSize:10, padding:'1px 7px'}}>{t}</span>)}
+                </div>
+                <div className="mono text-[11px] text-[var(--ink-mute)] mt-1">{h.cost.toLocaleString('sv-SE')} kr</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BesiktningPanel({ v }) {
+  const days = v.besiktning === '—' ? null : Math.round((new Date(v.besiktning) - new Date('2026-04-25')) / 86400000);
+  const urgent = days !== null && days < 14;
+  const soon   = days !== null && days < 30;
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-3 gap-3">
+        <div className="ink-box p-4"
+          style={urgent ? {borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)', background:'#fff8f8'} : soon ? {borderColor:'var(--warn)', background:'#fffbee'} : {}}>
+          <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)]">Nästa besiktning</div>
+          <div className="hand font-bold text-[22px] mt-1 mono" style={{color: urgent ? 'var(--danger)' : soon ? 'var(--warn)' : 'var(--ink)'}}>
+            {v.besiktning === '—' ? 'Avställd' : v.besiktning}
+          </div>
+          {days !== null && <div className="hand text-[13px]" style={{color: urgent ? 'var(--danger)' : 'var(--ink-mute)'}}>
+            {days < 0 ? `Förfallen ${Math.abs(days)} dagar sedan` : `om ${days} dagar`}
+          </div>}
+        </div>
+        <div className="ink-box-soft p-4">
+          <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)]">Senaste besiktning</div>
+          <div className="hand font-bold text-[18px] mt-1">2024-09-12</div>
+          <div className="hand text-[12px] text-[var(--ink-mute)]">Godkänd — inga anmärkningar</div>
+        </div>
+        <div className="ink-box-soft p-4">
+          <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)]">Besiktningsorgan</div>
+          <div className="hand font-bold text-[18px] mt-1">Opus Bilprovning</div>
+          <div className="hand text-[12px] text-[var(--ink-mute)]">Halmstad, Industrigatan 28</div>
+        </div>
+      </div>
+      {(urgent || soon) && (
+        <div className="flex items-center gap-3 p-3 rounded-md"
+          style={{background: urgent ? '#fff8f8' : '#fffbee', border:`1px solid ${urgent ? 'var(--danger)' : 'var(--warn)'}`}}>
+          <span className={`dot ${urgent ? 'bad' : 'warn'}`}/>
+          <div className="hand text-[14px]">{urgent ? 'Besiktning förfaller snart — boka omedelbart' : 'Besiktning inom 30 dagar — boka nu'}</div>
+          <button className="ink-btn ml-auto" style={{fontSize:13, borderColor: urgent?'var(--danger)':'var(--warn)', boxShadow:`2px 2px 0 0 ${urgent?'var(--danger)':'var(--warn)'}`}}>Boka besiktning →</button>
+        </div>
+      )}
+      <div>
+        <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Besiktningshistorik (Transportstyrelsen)</div>
+        <div className="ink-box overflow-hidden">
+          {[
+            { date:'2024-09-12', result:'Godkänd', notes:'Inga anmärkningar',                         station:'Opus Bilprovning Halmstad' },
+            { date:'2022-09-08', result:'Godkänd', notes:'Anmärkning: bromsbelägg slitna (åtgärdat)', station:'Dekra Halmstad' },
+            { date:'2021-11-14', result:'Godkänd', notes:'Inga anmärkningar',                         station:'Opus Bilprovning Halmstad' },
+          ].map((h,i) => (
+            <div key={i} className="flex items-center gap-4 px-3 py-2.5 border-b border-black/10 last:border-0">
+              <span className="hand text-[11px]" style={{color:'var(--ok)'}}>✓</span>
+              <div className="mono text-[12px] font-bold w-24 shrink-0">{h.date}</div>
+              <div className="hand font-bold text-[13px] w-20 shrink-0">{h.result}</div>
+              <div className="hand text-[12px] text-[var(--ink-mute)] flex-1">{h.notes}</div>
+              <div className="hand text-[12px] text-[var(--ink-mute)] shrink-0">{h.station}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IncidentPanel({ v }) {
+  const vIncidents = INCIDENTS.filter(inc => inc.reg === v.reg);
+  const statusLabel = { open:'Öppen', in_progress:'Pågår', resolved:'Löst' };
+  const statusBg    = { open:'#fff8f8', in_progress:'#fffbee', resolved:'var(--paper-2)' };
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="hand text-[14px] text-[var(--ink-mute)]">{vIncidents.length} incidenter registrerade</div>
+        <button className="ink-btn accent" style={{fontSize:13}}>+ Rapportera incident</button>
+      </div>
+      {vIncidents.length === 0 ? (
+        <div className="ink-dash flex flex-col items-center justify-center py-10 gap-2">
+          <div className="hand text-lg font-bold">Inga incidenter</div>
+          <div className="hand text-[var(--ink-mute)]">Rapportera ett problem med fordonet</div>
+          <button className="ink-btn accent mt-2" style={{fontSize:13}}>+ Ny incident</button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {vIncidents.map(inc => {
+            const priColor = inc.priority==='high' ? 'var(--danger)' : inc.priority==='medium' ? 'var(--warn)' : 'var(--ink-mute)';
+            return (
+              <div key={inc.id} className="ink-box p-3"
+                style={{background: statusBg[inc.status], borderColor: inc.status==='open' ? priColor : 'var(--ink)', boxShadow: `2px 2px 0 0 ${inc.status==='open' ? priColor : 'var(--ink)'}`}}>
+                <div className="flex items-start gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="hand font-bold text-[15px]">{inc.type}</span>
+                      <span className="ink-pill" style={{fontSize:10, padding:'1px 7px', background: inc.priority==='high'?'#ffe0e0':inc.priority==='medium'?'#fff3d4':'#f0f0f0'}}>
+                        {inc.priority==='high'?'Hög':inc.priority==='medium'?'Medium':'Låg'} prioritet
+                      </span>
+                      <span className="ink-pill" style={{fontSize:10, padding:'1px 7px'}}>{statusLabel[inc.status]}</span>
+                    </div>
+                    <div className="hand text-[12.5px] text-[var(--ink-soft)] mt-1">{inc.desc}</div>
+                    <div className="flex items-center gap-3 mt-1.5 mono text-[11px] text-[var(--ink-mute)]">
+                      <span>{inc.date}</span><span>·</span><span>{inc.driver}</span><span>·</span>
+                      <span>{inc.location}</span>
+                      {inc.photos > 0 && <><span>·</span><span>{inc.photos} foto</span></>}
+                    </div>
+                    {inc.steps.length > 0 && (
+                      <div className="mt-2 space-y-0.5">
+                        {inc.steps.map((s,j) => (
+                          <div key={j} className="flex items-center gap-1.5 hand text-[12px]">
+                            <span className="check on" style={{width:12,height:12,border:'1px solid var(--ink)',borderRadius:2,display:'inline-block',position:'relative',background:'#fff',flexShrink:0}}/>
+                            <span>{s}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {inc.photos > 0 && <PlaceholderPhoto label={`${inc.photos} foto`} w={80} h={60}/>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CompliancePanel({ v }) {
+  return (
+    <div className="space-y-5">
+      <div>
+        <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Körjournal — Skatteverket-export (IL 61 kap.)</div>
+        <div className="ink-box-soft p-4">
+          <div className="grid grid-cols-3 gap-3 mb-3">
+            {['Mars 2026','Februari 2026','Januari 2026'].map((m,i) => (
+              <div key={i} className="flex items-center justify-between px-3 py-2 rounded"
+                style={{background:'var(--paper-2)', border:'1px solid rgba(0,0,0,0.12)'}}>
+                <div>
+                  <div className="hand font-bold text-[13px]">{m}</div>
+                  <div className="hand text-[11px]" style={{color:'var(--ok)'}}>✓ Attesterad</div>
+                </div>
+                <div className="flex gap-1">
+                  <button className="ink-btn" style={{fontSize:11, padding:'3px 8px'}}>PDF</button>
+                  <button className="ink-btn" style={{fontSize:11, padding:'3px 8px'}}>CSV</button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <button className="ink-btn" style={{fontSize:13}}>Exportera hela 2026 (Skatteverket-format) →</button>
+        </div>
+      </div>
+      <div>
+        <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">GDPR — Registerutdrag Art. 15</div>
+        <div className="ink-box-soft p-3 flex items-center justify-between">
+          <div>
+            <div className="hand font-bold text-[14px]">Personuppgiftsutdrag för förare</div>
+            <div className="hand text-[12px] text-[var(--ink-mute)]">Alla uppgifter om förare kopplade till fordonet — GDPR Art. 15. Rättslig grund: Art. 6.1.c</div>
+          </div>
+          <button className="ink-btn" style={{fontSize:13}}>Begär utdrag →</button>
+        </div>
+      </div>
+      <div>
+        <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Driftkostnader 2026</div>
+        <div className="grid grid-cols-4 gap-3">
+          {[
+            { label:'Bränsle',  value:'4 840 kr',  sub:'jan–apr 2026' },
+            { label:'Service',  value:'3 840 kr',  sub:'senaste besiktning' },
+            { label:'Skatt',    value:'1 607 kr',  sub:'jan–apr 2026' },
+            { label:'Totalt',   value:'10 287 kr', sub:'jan–apr 2026' },
+          ].map((c,i) => (
+            <div key={i} className="ink-box-soft p-3">
+              <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">{c.label}</div>
+              <div className="hand font-bold text-[17px] mt-1">{c.value}</div>
+              <div className="hand text-[11px] text-[var(--ink-mute)]">{c.sub}</div>
+            </div>
+          ))}
+        </div>
+        <button className="ink-btn mt-3" style={{fontSize:13}}>Exportera kostnadsrapport →</button>
+      </div>
+      <div className="ink-box-soft p-3 bg-[var(--paper-2)]">
+        <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-1">Retention & GDPR</div>
+        <div className="hand text-[13px]">Körjournaldata bevaras <b>6 år</b> per Bokföringslagen. Råa GPS-spår raderas efter <b>90 dagar</b> per IMY. Grund: Art. 6.1.c (rättslig förpliktelse).</div>
+      </div>
+    </div>
+  );
+}
+
+function ForarePanel({ v }) {
+  const noDriver = v.driver === '—';
+  const profile  = DRIVER_PROFILES[v.driver];
+  const history  = v.driverHistory || [];
+  const licenseWarn = profile && profile.licenseExpiry < '2027-01';
+  const licenseColor = !profile ? 'var(--ink)' : profile.licenseExpiry < '2026-12' ? 'var(--danger)' : profile.licenseExpiry < '2028-01' ? 'var(--warn)' : 'var(--ink)';
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Nuvarande förare</div>
+        {noDriver ? (
+          <div className="ink-dash p-4 flex items-center justify-between">
+            <div>
+              <div className="hand font-bold text-[17px]">Ingen tilldelad förare</div>
+              <div className="hand text-[13px] text-[var(--ink-mute)]">Fordonet saknar en ansvarig förare</div>
+            </div>
+            <button className="ink-btn primary" style={{fontSize:13}}>Tilldela förare →</button>
+          </div>
+        ) : (
+          <div className="ink-box p-4 flex items-start gap-5">
+            <div className="w-14 h-14 rounded-full border-[1.5px] border-[var(--ink)] flex items-center justify-center bg-[var(--paper-2)] mono font-bold text-lg shrink-0">
+              {v.driver.split(' ').map(n=>n[0]).join('').slice(0,2)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="hand font-bold text-[20px] leading-tight">{v.driver}</div>
+              <div className="hand text-[13px] text-[var(--ink-mute)]">{v.dept} · sedan {v.driverSince}</div>
+              {profile && (
+                <div className="grid grid-cols-2 gap-x-8 gap-y-2 mt-3">
+                  <div>
+                    <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">Telefon</div>
+                    <div className="hand font-bold text-[14px]">{profile.phone}</div>
+                  </div>
+                  <div>
+                    <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">E-post</div>
+                    <div className="hand font-bold text-[14px]">{profile.email}</div>
+                  </div>
+                  <div>
+                    <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">Körkortsklass</div>
+                    <div className="hand font-bold text-[14px]">{profile.license}</div>
+                  </div>
+                  <div>
+                    <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">Körkort giltigt till</div>
+                    <div className="hand font-bold text-[14px]" style={{color: licenseColor}}>
+                      {profile.licenseExpiry}{licenseWarn && <span className="ml-1 text-[11px]">⚠ löper snart ut</span>}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-col gap-2 shrink-0">
+              <button className="ink-btn" style={{fontSize:13}}>Byt förare →</button>
+              <button className="ink-btn" style={{fontSize:13}}>Visa körjournal →</button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div>
+        <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Förarhistorik</div>
+        {history.length === 0 ? (
+          <div className="ink-box-soft p-3 bg-[var(--paper-2)]">
+            <div className="hand text-[13px] text-[var(--ink-mute)]">Inga tidigare förare registrerade</div>
+          </div>
+        ) : (
+          <div className="ink-box-soft overflow-hidden">
+            <div className="grid grid-cols-[200px_1fr] px-3 py-2 mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] border-b border-dashed border-black/30 bg-[var(--paper-2)]">
+              <div>Förare</div><div>Period(er)</div>
+            </div>
+            {history.map((d, i) => (
+              <div key={i} className="grid grid-cols-[200px_1fr] px-3 py-2.5 border-b border-black/10 last:border-b-0 items-start">
+                <div>
+                  <div className="hand font-bold text-[14px]">{d.name}</div>
+                  {d.periods.length > 1 && <div className="hand text-[11px]" style={{color:'var(--warn)'}}>↩ återkom</div>}
+                </div>
+                <div className="space-y-0.5">
+                  {d.periods.map((period, j) => (
+                    <div key={j} className="mono text-[12px] text-[var(--ink-soft)]">{period}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* Full vehicle detail for Option E */
+function VehicleDetailE({ v, colorful, redAlerts, orangeAlerts, onBack }) {
+  const [tab, setTab]     = useState('översikt');
+  const [expandedCard, setExpanded] = useState(null);
+  function switchTab(t)   { setTab(t); setExpanded(null); }
+
+  const ecu      = ECU_DATA[v.reg];
+  const hasDevice = !!ecu;
+  const statusBg = colorful ? (v.status==='ok'?'#e8f5ea':v.status==='warn'?'#fdf3d4':'#fbe0e0') : '#fff';
 
   const staticCards = [
-    { id:'km',        label:'Mätarställning', value: v.km.toLocaleString('sv-SE')+' km', sub:'uppdaterad 12 apr' },
-    { id:'event',     label:'Nästa händelse',  value: v.nextEvent,                        sub:'auto-påminnelse aktiv' },
-    { id:'insurance', label:'Försäkring',      value:'If Skade',                          sub:'giltig till 2026-12' },
-    { id:'tax',       label:'Skatt',           value:'4 820 kr / år',                     sub:'nästa: maj 2026' },
-    { id:'fuel',      label:'Bränsle apr',     value:'1 240 kr',                          sub:'est. snittförbrukning' },
+    { id:'km',        label:'Mätarställning', value: hasDevice ? (ecu.odometer.toLocaleString('sv-SE')+' km') : (v.km.toLocaleString('sv-SE')+' km'), sub: hasDevice ? 'ECU (juridisk)' : 'senast registrerad' },
+    { id:'event',     label:'Nästa händelse',  value: v.nextEvent,    sub:'auto-påminnelse aktiv' },
+    { id:'insurance', label:'Försäkring',      value:'If Skade',      sub:'giltig till 2026-12' },
+    { id:'tax',       label:'Skatt',           value:'4 820 kr / år', sub:'nästa: maj 2026' },
+    { id:'fuel',      label:'Bränsle apr',     value: hasDevice ? `${ecu.fuel_pct}% kvar` : '1 240 kr', sub: hasDevice ? 'ECU tanksensor' : 'est. snitt' },
+  ];
+
+  const tabs = [
+    { id:'översikt',   label:'Översikt' },
+    { id:'telematik',  label:'Telematik',  locked:!hasDevice },
+    { id:'körjournal', label:'Körjournal' },
+    { id:'besiktning', label:'Besiktning' },
+    { id:'service',    label:'Service' },
+    { id:'förare',     label:'Förare' },
+    { id:'försäkring', label:'Försäkring' },
+    { id:'incidenter', label:'Incidenter' },
+    { id:'compliance', label:'Compliance' },
+    { id:'dokument',   label:'Dokument' },
   ];
 
   return (
     <div className="flex flex-col gap-4">
-      <button onClick={onBack} className="flex items-center gap-1.5 hand text-[var(--ink-mute)] hover:text-[var(--ink)]" style={{fontSize:14}}>
-        ← Tillbaka till karta
-      </button>
+      <button onClick={onBack} className="flex items-center gap-1.5 hand text-[var(--ink-mute)] hover:text-[var(--ink)]" style={{fontSize:14}}>← Tillbaka till karta</button>
 
       <div className="ink-box p-4 flex items-center gap-5">
-        <div className="ink-box-soft p-2 bg-[var(--paper-2)] shrink-0">
-          <VehicleThumb v={v} size={56}/>
-        </div>
+        <div className="ink-box-soft p-2 bg-[var(--paper-2)] shrink-0"><VehicleThumb v={v} size={56}/></div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
             <h2 className="hand font-bold text-3xl whitespace-nowrap">{v.reg}</h2>
-            <span className="ink-pill" style={{background:statusBg}}>
-              <StatusDot s={v.status}/> <span className="ml-1">{STATUS_LABEL[v.status]}</span>
-            </span>
+            <span className="ink-pill" style={{background:statusBg}}><StatusDot s={v.status}/> <span className="ml-1">{STATUS_LABEL[v.status]}</span></span>
+            {hasDevice && ecu.ignition && <span className="ink-pill" style={{background:'rgba(59,157,72,0.15)', fontSize:11}}>På väg · {ecu.speed} km/h</span>}
+            {hasDevice && ecu.dtcs.length > 0 && <span className="ink-pill" style={{background:'#ffe0e0', borderColor:'var(--danger)', fontSize:11}}>{ecu.dtcs.length} DTC-fel</span>}
+            {!hasDevice && <span className="ink-pill" style={{borderStyle:'dashed', fontSize:11}}>Ingen FMC003-enhet</span>}
           </div>
           <div className="hand text-[var(--ink-mute)]">{v.model} · {v.year} · {v.dept}</div>
-          <div className="mono text-[11px] text-[var(--ink-mute)] mt-0.5">GPS senast uppdaterad: 07:39</div>
+          {hasDevice && <div className="mono text-[11px] text-[var(--ink-mute)] mt-0.5">GPS {ecu.updated} · HDOP {ecu.hdop}</div>}
         </div>
         <div className="flex gap-2 shrink-0">
-          <button className="ink-btn" style={{fontSize:13}}>Rapportera fel</button>
+          <button className="ink-btn" style={{fontSize:13}}>Rapportera incident</button>
           <button className="ink-btn primary" style={{fontSize:13}}>Redigera</button>
         </div>
       </div>
@@ -708,26 +1185,19 @@ function VehicleDetail({ v, colorful, redAlerts, orangeAlerts, onBack }) {
       {redAlerts.map(a => (
         <div key={a.reg+a.label} className="ink-box p-3 flex items-center justify-between"
           style={{borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)', background:'#fff8f8'}}>
-          <div className="flex items-center gap-2">
-            <span className="dot bad"/>
-            <div>
-              <div className="hand font-bold" style={{color:'var(--danger)'}}>{a.label}</div>
-              <div className="hand text-[12px] text-[var(--ink-mute)]">{a.detail}</div>
-            </div>
+          <div className="flex items-center gap-2"><span className="dot bad"/>
+            <div><div className="hand font-bold" style={{color:'var(--danger)'}}>{a.label}</div>
+            <div className="hand text-[12px] text-[var(--ink-mute)]">{a.detail}</div></div>
           </div>
           <button className="ink-btn" style={{fontSize:13, borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)'}}>{a.actionLabel}</button>
         </div>
       ))}
-
       {orangeAlerts.map(a => (
         <div key={a.reg+a.label} className="ink-box-soft p-3 flex items-center justify-between"
           style={{borderColor:'var(--warn)', background:'#fffbee'}}>
-          <div className="flex items-center gap-2">
-            <span className="dot warn"/>
-            <div>
-              <div className="hand font-bold">{a.label}</div>
-              <div className="hand text-[12px] text-[var(--ink-mute)]">{a.detail}</div>
-            </div>
+          <div className="flex items-center gap-2"><span className="dot warn"/>
+            <div><div className="hand font-bold">{a.label}</div>
+            <div className="hand text-[12px] text-[var(--ink-mute)]">{a.detail}</div></div>
           </div>
           <button className="ink-btn" style={{fontSize:13}}>{a.actionLabel}</button>
         </div>
@@ -735,13 +1205,15 @@ function VehicleDetail({ v, colorful, redAlerts, orangeAlerts, onBack }) {
 
       <div>
         <div className="flex border-b-[1.5px] border-black overflow-x-auto">
-          {['översikt','besiktning','service','försäkring','körjournal','dokument'].map(t=>(
-            <button key={t} onClick={()=>switchTab(t)} className={`tab ${tab===t?'active':''}`}>{t}</button>
+          {tabs.map(t => (
+            <button key={t.id} onClick={()=>switchTab(t.id)} className={`tab ${tab===t.id?'active':''}`}>
+              {t.label}{t.locked && <span className="mono text-[9px] opacity-50 ml-1">🔒</span>}
+            </button>
           ))}
         </div>
+
         <div className="ink-box p-5 -mt-[1.5px] rounded-t-none">
-          {tab === 'översikt' && !expandedCard && (
-            /* ── Default grid layout ── */
+          {tab==='översikt' && !expandedCard && (
             <div className="grid grid-cols-3 gap-4">
               {staticCards.map(c => (
                 <div key={c.id} className="ink-box-soft p-3">
@@ -750,66 +1222,111 @@ function VehicleDetail({ v, colorful, redAlerts, orangeAlerts, onBack }) {
                   <div className="hand text-[12px] text-[var(--ink-mute)]">{c.sub}</div>
                 </div>
               ))}
-              <DriverCell
-                driver={v.driver} driverSince={v.driverSince} driverHistory={v.driverHistory||[]}
-                onExpand={() => setExpanded('driver')}
-              />
+              <DriverCell driver={v.driver} driverSince={v.driverSince} driverHistory={v.driverHistory||[]} onExpand={()=>setExpanded('driver')}/>
               <div className="col-span-3 grid grid-cols-4 gap-3 mt-2">
                 {FUNCTIONS.slice(0,8).map(f => <FunctionTile key={f.k} f={f} colorful={colorful}/>)}
+              </div>
+              <div className="col-span-3 border-t border-dashed border-black/25 pt-3 mt-1">
+                <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Aktiva moduler (3-nivåers gating: abonnemang · roll · fordon)</div>
+                <div className="flex gap-2 flex-wrap">
+                  {[
+                    { label:'Core',         active:true,      note:'Fordonsregister' },
+                    { label:'Körjournal',   active:true,      note:'Manuellt läge' },
+                    { label:'Telematik',    active:hasDevice, note: hasDevice ? 'FMC003 aktiv' : 'Ingen enhet' },
+                    { label:'Compliance',   active:true,      note:'SKV + GDPR' },
+                    { label:'Incidents',    active:true,      note:'Synlighet: org' },
+                    { label:'Intelligence', active:false,     note:'Ej aktiverat' },
+                  ].map((m,i) => (
+                    <span key={i} className="ink-pill" style={{fontSize:11,
+                      background: m.active ? (colorful ? '#e8f5ea' : '#fff') : 'var(--paper-2)',
+                      borderStyle: m.active ? 'solid' : 'dashed',
+                      color: m.active ? 'var(--ink)' : 'var(--ink-mute)'}}>
+                      {m.active ? '✓' : '—'} {m.label} <span style={{fontWeight:400, opacity:0.7}}>· {m.note}</span>
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
-          {tab === 'översikt' && expandedCard && (
-            /* ── Expanded layout: compact strip + full-width focused card ── */
+          {tab==='översikt' && expandedCard && (
             <div>
-              {/* Compact strip — other cards shrink to single-line chips.
-                  Clicking a chip switches focus. ← standardvy always visible right. */}
               <div className="flex flex-wrap items-center gap-2 pb-3 mb-4 border-b border-dashed border-black/25">
-                {staticCards.filter(c => c.id !== expandedCard).map(c => (
-                  <button key={c.id} onClick={() => setExpanded(c.id)}
-                    className="ink-box-soft px-2.5 py-1.5 flex items-center gap-1.5 hover:bg-[var(--paper-2)] text-left">
+                {staticCards.filter(c=>c.id!==expandedCard).map(c=>(
+                  <button key={c.id} onClick={()=>setExpanded(c.id)} className="ink-box-soft px-2.5 py-1.5 flex items-center gap-1.5 hover:bg-[var(--paper-2)] text-left">
                     <span className="mono text-[9px] text-[var(--ink-mute)] uppercase tracking-wider whitespace-nowrap">{c.label}</span>
                     <span className="hand font-bold text-[13px] whitespace-nowrap">{c.value}</span>
                   </button>
                 ))}
-                {expandedCard !== 'driver' && (
-                  <button onClick={() => setExpanded('driver')}
-                    className="ink-box-soft px-2.5 py-1.5 flex items-center gap-1.5 hover:bg-[var(--paper-2)]">
+                {expandedCard!=='driver' && (
+                  <button onClick={()=>setExpanded('driver')} className="ink-box-soft px-2.5 py-1.5 flex items-center gap-1.5 hover:bg-[var(--paper-2)]">
                     <span className="mono text-[9px] text-[var(--ink-mute)] uppercase tracking-wider">Förare</span>
                     <span className="hand font-bold text-[13px]">{v.driver}</span>
                   </button>
                 )}
-                <button onClick={() => setExpanded(null)}
-                  className="ml-auto ink-btn" style={{fontSize:12, padding:'4px 10px'}}>
-                  ← standardvy
-                </button>
+                <button onClick={()=>setExpanded(null)} className="ml-auto ink-btn" style={{fontSize:12, padding:'4px 10px'}}>← standardvy</button>
               </div>
-
-              {/* Full-width expanded content */}
-              {expandedCard === 'driver' && (
-                <DriverExpanded driver={v.driver} driverSince={v.driverSince} driverHistory={v.driverHistory||[]}/>
-              )}
-              {expandedCard !== 'driver' && (() => {
-                const c = staticCards.find(x => x.id === expandedCard);
-                return c ? (
-                  <div>
-                    <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">{c.label}</div>
-                    <div className="hand font-bold text-3xl mt-1">{c.value}</div>
-                    <div className="hand text-[13px] text-[var(--ink-mute)] mt-0.5">{c.sub}</div>
-                  </div>
-                ) : null;
-              })()}
+              {expandedCard==='driver'
+                ? <DriverExpanded driver={v.driver} driverSince={v.driverSince} driverHistory={v.driverHistory||[]}/>
+                : (() => { const c = staticCards.find(x=>x.id===expandedCard); return c ? (
+                    <div>
+                      <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">{c.label}</div>
+                      <div className="hand font-bold text-3xl mt-1">{c.value}</div>
+                      <div className="hand text-[13px] text-[var(--ink-mute)] mt-0.5">{c.sub}</div>
+                    </div>) : null; })()
+              }
             </div>
           )}
 
-          {tab !== 'översikt' && (
-            <div className="min-h-[280px] flex items-center justify-center">
-              <div className="text-center">
-                <div className="hand text-xl font-bold">[ {tab} ]</div>
-                <div className="hand text-[var(--ink-mute)] mt-1">fliken "{tab}" för {v.reg}</div>
-                <div className="mt-3 mono text-[11px] text-[var(--ink-mute)]">wireframe · full vy utvecklas separat</div>
-              </div>
+          {tab==='telematik'  && <TelematikPanel  v={v} colorful={colorful}/>}
+          {tab==='körjournal' && <KorjournalPanel v={v}/>}
+          {tab==='besiktning' && <BesiktningPanel v={v} colorful={colorful}/>}
+          {tab==='service'    && <ServicePanel    v={v}/>}
+          {tab==='förare'     && <ForarePanel     v={v}/>}
+          {tab==='incidenter' && <IncidentPanel   v={v} colorful={colorful}/>}
+          {tab==='compliance' && <CompliancePanel v={v}/>}
+
+          {tab==='försäkring' && (
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label:'Bolag',           value:'If Skade' },
+                { label:'Typ',             value:'Helförsäkring' },
+                { label:'Giltig till',     value:'2026-12-31' },
+                { label:'Premie',          value:'8 640 kr/år' },
+                { label:'Självrisk',       value:'3 500 kr' },
+                { label:'Ärendenummer',    value:'IF-2024-44821' },
+              ].map((c,i) => (
+                <div key={i} className="ink-box-soft p-3">
+                  <div className="mono text-[9px] uppercase tracking-wider text-[var(--ink-mute)]">{c.label}</div>
+                  <div className="hand font-bold text-[18px] mt-1">{c.value}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {tab==='dokument' && (
+            <div className="space-y-3">
+              {[
+                { name:'Körjournal mars 2026.pdf',      type:'Körjournal', date:'2026-04-01', size:'284 KB' },
+                { name:'Körjournal februari 2026.pdf',  type:'Körjournal', date:'2026-03-02', size:'261 KB' },
+                { name:'Besiktningsprotokoll 2024.pdf', type:'Besiktning', date:'2024-09-12', size:'512 KB' },
+                { name:'Servicekvitto sep 2025.pdf',    type:'Service',    date:'2025-09-14', size:'128 KB' },
+                { name:'Försäkringsbrev If 2026.pdf',   type:'Försäkring', date:'2026-01-01', size:'1.2 MB' },
+              ].map((d,i) => (
+                <div key={i} className="ink-box-soft p-3 flex items-center gap-3">
+                  <div className="shrink-0 w-8 h-8 border-[1.5px] border-[var(--ink)] rounded-md flex items-center justify-center bg-[var(--paper-2)] mono text-sm">▤</div>
+                  <div className="flex-1">
+                    <div className="hand font-bold text-[14px]">{d.name}</div>
+                    <div className="flex gap-3 mono text-[10px] text-[var(--ink-mute)] mt-0.5">
+                      <span>{d.type}</span><span>{d.date}</span><span>{d.size}</span>
+                    </div>
+                  </div>
+                  <button className="ink-btn" style={{fontSize:12, padding:'4px 10px'}}>↓ Ladda ned</button>
+                </div>
+              ))}
+              <button className="ink-dash flex items-center justify-center gap-2 py-2.5 w-full wobble">
+                <span className="hand text-sm">+ Ladda upp dokument</span>
+              </button>
             </div>
           )}
         </div>
@@ -819,35 +1336,36 @@ function VehicleDetail({ v, colorful, redAlerts, orangeAlerts, onBack }) {
 }
 
 /* ============================================================
-   OPTION B — Fleet Dashboard: top bar + sidebar + map/detail
-   Laws of Simplicity applied: Reduce · Organize · Trust · Time
+   OPTION E — Full Architecture Dashboard
+   B structure + all 6 modules + complete .md coverage
    ============================================================ */
-function OptionB({ colorful }) {
-  const [selectedReg, setSelectedReg]       = useState(null);
-  const [sidebarFilter, setSidebarFilter]   = useState('all');
-  const [sidebarSearch, setSidebarSearch]   = useState('');
-  const [alertPaneOpen, setAlertPaneOpen]   = useState(false);
-
+function OptionE({ colorful }) {
+  const [selectedReg, setSelectedReg]     = useState(null);
+  const [sidebarFilter, setSidebarFilter] = useState('all');
+  const [sidebarSearch, setSidebarSearch] = useState('');
+  const [alertPaneOpen, setAlertPaneOpen] = useState(false);
   const picked = selectedReg ? VEHICLES.find(v => v.reg === selectedReg) : null;
 
-  /* ── Derived alerts ── */
   const redAlerts = [
-    { reg:'HIJ 654', label:'Besiktning förfallen',       detail:'Bilen måste genomgå besiktning omedelbart',        action:'besiktning', actionLabel:'Öppna besiktning →' },
-    { reg:'GHI 789', label:'Avställd utan tillåtelse',   detail:'Fordon kördes avställt 2026-04-18',                action:'korjournal', actionLabel:'Visa körjournal →' },
+    { reg:'HIJ 654', label:'Besiktning förfallen',    detail:'Bilen måste genomgå besiktning omedelbart',      action:'besiktning', actionLabel:'Öppna besiktning →' },
+    { reg:'GHI 789', label:'Avställd utan tillåtelse',detail:'Fordon kördes avställt 2026-04-18',               action:'korjournal', actionLabel:'Visa körjournal →' },
+    { reg:'STU 901', label:'DTC-fel: P0420 + P0171',  detail:'Katalysator + syresensor — verkstad krävs',      action:'telematik',  actionLabel:'Öppna telematik →' },
   ];
   const orangeAlerts = [
-    { reg:'DEF 456', label:'Besiktning om 13 dagar',     detail:'Nästa besiktning: 3 maj 2026',                     action:'besiktning', actionLabel:'Boka besiktning →' },
-    { reg:'PQR 678', label:'Besiktning om 32 dagar',     detail:'Nästa besiktning: 22 maj 2026',                    action:'besiktning', actionLabel:'Boka besiktning →' },
-    { reg:'ABC 123', label:'Service om 3 veckor',        detail:'Rekommenderat serviceintervall infaller om 21 dagar', action:'service', actionLabel:'Boka service →' },
+    { reg:'DEF 456', label:'Besiktning om 8 dagar',   detail:'Nästa besiktning: 3 maj 2026',                   action:'besiktning', actionLabel:'Boka besiktning →' },
+    { reg:'PQR 678', label:'Besiktning om 27 dagar',  detail:'Nästa besiktning: 22 maj 2026',                  action:'besiktning', actionLabel:'Boka besiktning →' },
+    { reg:'ABC 123', label:'Service om 3 veckor',     detail:'Rekommenderat serviceintervall om 21 dagar',     action:'service',    actionLabel:'Boka service →' },
+    { reg:'DEF 456', label:'Bränsle under 25 %',      detail:'DEF 456 · bränslenivå 22 % — tankning behövs',  action:'telematik',  actionLabel:'Visa telematik →' },
+  ];
+  const infoAlerts = [
+    { label:'Resa avslutad 07:38', detail:'YZA 567 · Göteborg C → Halmstad Åkeri · 141 km', reg:'YZA 567' },
+    { label:'2 resor att bekräfta', detail:'ABC 123 · Maria Lindqvist · apr 23–24',           reg:'ABC 123' },
+    { label:'Ny incident rapporterad', detail:'STU 901 · Motorvarningslampa · Anna Berg',     reg:'STU 901' },
   ];
 
-  /* ── Top bar stats ── */
-  const activeCount = VEHICLES.filter(v => v.status==='ok').length;
-  const nextMaint   = [...VEHICLES].filter(v => v.besiktning !== '—').sort((a,b) => a.besiktning.localeCompare(b.besiktning))[0];
-  const daysToNext  = nextMaint ? Math.round((new Date(nextMaint.besiktning) - new Date('2026-04-20')) / 86400000) : null;
-  const urgentColor = daysToNext < 14 ? 'var(--danger)' : daysToNext < 30 ? 'var(--warn)' : 'var(--ink)';
+  const onRouteVehicles = VEHICLES.filter(v => ECU_DATA[v.reg]?.ignition);
+  const activeCount     = VEHICLES.filter(v => v.status==='ok').length;
 
-  /* ── Sidebar filtering & sort (warnings first) ── */
   const sortOrder = { warn:0, ok:1, off:2 };
   const filteredVehicles = [...VEHICLES]
     .filter(v => sidebarFilter==='all' || v.status===sidebarFilter)
@@ -858,20 +1376,15 @@ function OptionB({ colorful }) {
     })
     .sort((a,b) => sortOrder[a.status] - sortOrder[b.status]);
 
-  function handleAlertClick(alert) {
-    setSelectedReg(alert.reg);
-    setAlertPaneOpen(false);
-  }
+  function handleAlertClick(alert) { setSelectedReg(alert.reg); setAlertPaneOpen(false); }
 
   return (
     <div className="paper" style={{minHeight:'100vh'}}>
       <SketchHeader onHome={()=>{ setSelectedReg(null); setAlertPaneOpen(false); }}/>
 
-      {/* ─────────── TOP BAR: 4 KPI metrics (3-second glance) ─────────── */}
+      {/* ─── TOP BAR: 4 KPIs per ARCHITECTURE.md TB1–TB4 ─── */}
       <div className="border-b-[1.5px] border-dashed border-black/40 bg-white">
         <div className="max-w-[1180px] mx-auto px-6 py-3 flex items-center gap-0">
-
-          {/* KPI 1 — Active vehicles */}
           <div className="flex items-center gap-2.5 pr-6">
             <span className="dot ok"/>
             <div>
@@ -881,30 +1394,21 @@ function OptionB({ colorful }) {
           </div>
           <div className="w-px h-9 bg-black/15 mr-6"/>
 
-          {/* KPI 2 — Alerts (clickable, opens pane) */}
-          <button onClick={()=>setAlertPaneOpen(o=>!o)}
-            className="flex items-center gap-2.5 pr-6 hover:opacity-75 transition-opacity">
+          <button onClick={()=>setAlertPaneOpen(o=>!o)} className="flex items-center gap-2.5 pr-6 hover:opacity-75 transition-opacity">
             <div>
               <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Larm</div>
               <div className="flex items-center gap-2 leading-tight">
-                {redAlerts.length > 0 && (
-                  <span className="hand font-bold text-xl" style={{color:'var(--danger)'}}>{redAlerts.length} akut</span>
-                )}
-                {orangeAlerts.length > 0 && (
-                  <span className="hand font-bold text-xl" style={{color:'var(--warn)'}}>
-                    {redAlerts.length > 0 && <span className="opacity-40 mr-1">·</span>}{orangeAlerts.length} planerat
-                  </span>
-                )}
-                {redAlerts.length===0 && orangeAlerts.length===0 && (
-                  <span className="hand font-bold text-xl" style={{color:'var(--ok)'}}>Allt klart ✓</span>
-                )}
-                <span className="mono text-[10px] text-[var(--ink-mute)]">{alertPaneOpen ? '▴' : '▾'}</span>
+                {redAlerts.length > 0 && <span className="hand font-bold text-xl" style={{color:'var(--danger)'}}>{redAlerts.length} akut</span>}
+                {orangeAlerts.length > 0 && <span className="hand font-bold text-xl" style={{color:'var(--warn)'}}>
+                  {redAlerts.length > 0 && <span className="opacity-40 mr-1">·</span>}{orangeAlerts.length} planerat
+                </span>}
+                {redAlerts.length===0 && orangeAlerts.length===0 && <span className="hand font-bold text-xl" style={{color:'var(--ok)'}}>Allt klart ✓</span>}
+                <span className="mono text-[10px] text-[var(--ink-mute)]">{alertPaneOpen?'▴':'▾'}</span>
               </div>
             </div>
           </button>
           <div className="w-px h-9 bg-black/15 mr-6"/>
 
-          {/* KPI 3 — Fuel cost */}
           <div className="flex items-center gap-2.5 pr-6">
             <div>
               <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Bränsle apr</div>
@@ -913,13 +1417,14 @@ function OptionB({ colorful }) {
           </div>
           <div className="w-px h-9 bg-black/15 mr-6"/>
 
-          {/* KPI 4 — Next maintenance */}
           <div className="flex items-center gap-2.5">
             <div>
-              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Nästa service</div>
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">På väg nu</div>
               <div className="flex items-center gap-1.5 leading-tight">
-                <span className="hand font-bold text-xl" style={{color:urgentColor}}>{daysToNext} dagar</span>
-                <span className="mono text-[11px] text-[var(--ink-mute)]">· {nextMaint?.reg}</span>
+                <span className="hand font-bold text-xl" style={{color: onRouteVehicles.length>0 ? 'var(--ok)' : 'var(--ink-mute)'}}>
+                  {onRouteVehicles.length}
+                </span>
+                <span className="mono text-[11px] text-[var(--ink-mute)]">· {onRouteVehicles.map(v=>v.reg).join(', ')}</span>
               </div>
             </div>
           </div>
@@ -928,152 +1433,126 @@ function OptionB({ colorful }) {
         </div>
       </div>
 
-      {/* ─────────── ALERT PANE (drops under top bar on demand) ─────────── */}
+      {/* ─── ALERT PANE: 3 columns — kritiskt / snart / info ─── */}
       {alertPaneOpen && (
         <div className="border-b-2 border-black bg-white">
           <div className="max-w-[1180px] mx-auto px-6 py-4">
             <div className="flex items-center justify-between mb-3">
-              <div className="hand font-bold text-lg">Aktiva larm</div>
+              <div className="hand font-bold text-lg">Aktiva larm & händelser</div>
               <button onClick={()=>setAlertPaneOpen(false)} className="hand text-[var(--ink-mute)] text-sm hover:text-[var(--ink)]">stäng ✕</button>
             </div>
-
-            {redAlerts.length > 0 && (
-              <div className="mb-4">
-                <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{color:'var(--danger)'}}>Akuta larm — åtgärd krävs nu</div>
+            <div className="grid grid-cols-3 gap-5">
+              <div>
+                <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{color:'var(--danger)'}}>🔴 Kritiskt nu — åtgärd omedelbart</div>
                 <div className="space-y-2">
                   {redAlerts.map(a => (
-                    <div key={a.reg+a.label} className="ink-box p-3 flex items-center justify-between"
+                    <div key={a.reg+a.label} className="ink-box p-2.5 flex items-start gap-2"
                       style={{borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)', background:'#fff8f8'}}>
-                      <div className="flex items-center gap-2">
-                        <span className="dot bad"/>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="hand font-bold">{a.label}</span>
-                            <span className="mono text-[12px] text-[var(--ink-mute)]">· {a.reg}</span>
-                          </div>
-                          <div className="hand text-[12px] text-[var(--ink-mute)]">{a.detail}</div>
-                        </div>
+                      <span className="dot bad mt-0.5 shrink-0"/>
+                      <div className="flex-1 min-w-0">
+                        <div className="hand font-bold text-[13px]">{a.label}</div>
+                        <div className="mono text-[10px] text-[var(--ink-mute)]">{a.reg}</div>
+                        <div className="hand text-[11px] text-[var(--ink-mute)]">{a.detail}</div>
                       </div>
-                      <button onClick={()=>handleAlertClick(a)} className="ink-btn" style={{fontSize:13, borderColor:'var(--danger)', boxShadow:'2px 2px 0 0 var(--danger)'}}>{a.actionLabel}</button>
+                      <button onClick={()=>handleAlertClick(a)} className="ink-btn shrink-0" style={{fontSize:11, padding:'3px 8px', borderColor:'var(--danger)', boxShadow:'1px 1px 0 0 var(--danger)'}}>→</button>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
-
-            {orangeAlerts.length > 0 && (
               <div>
-                <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{color:'var(--warn)'}}>Planerade åtgärder — inom 30 dagar</div>
+                <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{color:'var(--warn)'}}>🟠 Snart förfaller — inom 30 dagar</div>
                 <div className="space-y-2">
                   {orangeAlerts.map(a => (
-                    <div key={a.reg+a.label} className="ink-box-soft p-3 flex items-center justify-between"
+                    <div key={a.reg+a.label} className="ink-box-soft p-2.5 flex items-start gap-2"
                       style={{borderColor:'var(--warn)', background:'#fffbee'}}>
-                      <div className="flex items-center gap-2">
-                        <span className="dot warn"/>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="hand font-bold">{a.label}</span>
-                            <span className="mono text-[12px] text-[var(--ink-mute)]">· {a.reg}</span>
-                          </div>
-                          <div className="hand text-[12px] text-[var(--ink-mute)]">{a.detail}</div>
-                        </div>
+                      <span className="dot warn mt-0.5 shrink-0"/>
+                      <div className="flex-1 min-w-0">
+                        <div className="hand font-bold text-[13px]">{a.label}</div>
+                        <div className="mono text-[10px] text-[var(--ink-mute)]">{a.reg}</div>
+                        <div className="hand text-[11px] text-[var(--ink-mute)]">{a.detail}</div>
                       </div>
-                      <button onClick={()=>handleAlertClick(a)} className="ink-btn" style={{fontSize:13}}>{a.actionLabel}</button>
+                      <button onClick={()=>handleAlertClick(a)} className="ink-btn shrink-0" style={{fontSize:11, padding:'3px 8px'}}>→</button>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
+              <div>
+                <div className="mono text-[10px] uppercase tracking-wider mb-2 text-[var(--ink-mute)]">⚪ Info — senaste händelser</div>
+                <div className="space-y-2">
+                  {infoAlerts.map((a,i) => (
+                    <div key={i} className="ink-box-soft p-2.5 flex items-start gap-2 bg-[var(--paper-2)]"
+                      style={{cursor:'pointer'}} onClick={()=>handleAlertClick(a)}>
+                      <span className="dot off mt-0.5 shrink-0"/>
+                      <div className="flex-1 min-w-0">
+                        <div className="hand font-bold text-[13px]">{a.label}</div>
+                        <div className="hand text-[11px] text-[var(--ink-mute)]">{a.detail}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* ─────────── MAIN LAYOUT: sidebar + content ─────────── */}
-      <div className="max-w-[1180px] mx-auto px-6 py-4 flex gap-5" style={{minHeight:'calc(100vh - 160px)'}}>
-
-        {/* ── Left sidebar: scrollable vehicle list ── */}
+      {/* ─── MAIN LAYOUT ─── */}
+      <div className="max-w-[1180px] mx-auto px-6 py-4 flex gap-5" style={{minHeight:'calc(100vh - 180px)'}}>
+        {/* Sidebar */}
         <div className="w-[252px] shrink-0 flex flex-col gap-3">
-          {/* Search */}
           <div className="ink-box-soft px-3 py-2 flex items-center gap-2">
             <span className="mono text-xs opacity-60">🔎︎</span>
-            <input
-              value={sidebarSearch}
-              onChange={e=>setSidebarSearch(e.target.value)}
+            <input value={sidebarSearch} onChange={e=>setSidebarSearch(e.target.value)}
               placeholder="sök regnr / förare…"
               className="flex-1 bg-transparent hand text-sm outline-none"
-              style={{fontFamily:'Kalam, cursive', color:'var(--ink)'}}
-            />
+              style={{fontFamily:'Kalam, cursive', color:'var(--ink)'}}/>
           </div>
-
-          {/* Status filter */}
           <div className="flex gap-1 flex-wrap">
             {[['all','Alla'],['ok','Aktiva'],['warn','Varning'],['off','Avställda']].map(([k,l])=>(
-              <button key={k} onClick={()=>setSidebarFilter(k)}
-                className={`ink-pill ${sidebarFilter===k?'filled':''}`} style={{fontSize:11}}>{l}</button>
+              <button key={k} onClick={()=>setSidebarFilter(k)} className={`ink-pill ${sidebarFilter===k?'filled':''}`} style={{fontSize:11}}>{l}</button>
             ))}
           </div>
-
-          {/* Vehicle list — warnings float to top */}
-          <div className="flex-1 space-y-1.5 overflow-y-auto pr-0.5" style={{maxHeight:'calc(100vh - 330px)'}}>
+          <div className="flex-1 space-y-1.5 overflow-y-auto pr-0.5" style={{maxHeight:'calc(100vh - 380px)'}}>
             {filteredVehicles.map(v => {
-              const active      = v.reg === selectedReg;
-              const hasRed      = redAlerts.some(a => a.reg === v.reg);
-              const hasOrange   = orangeAlerts.some(a => a.reg === v.reg);
+              const active    = v.reg === selectedReg;
+              const hasRed    = redAlerts.some(a => a.reg === v.reg);
+              const hasOrange = orangeAlerts.some(a => a.reg === v.reg);
+              const ecu       = ECU_DATA[v.reg];
               const borderColor = !active && hasRed ? 'var(--danger)' : !active && hasOrange ? 'var(--warn)' : 'var(--ink)';
-              const priorityDot = hasRed ? 'bad' : hasOrange ? 'warn' : v.status === 'off' ? 'off' : 'ok';
-              const showEvent   = !active && (hasRed || hasOrange);
               return (
-                <button key={v.reg}
-                  onClick={()=>setSelectedReg(active ? null : v.reg)}
-                  className="w-full text-left p-2.5 border-[1.5px] rounded-md flex items-center gap-3 wobble"
-                  style={{
-                    borderColor,
-                    background: active ? 'var(--ink)' : '#fff',
-                    color: active ? 'var(--paper)' : 'var(--ink)',
-                    boxShadow: active ? '2px 2px 0 0 #555' : `2px 2px 0 0 ${borderColor}`,
-                  }}>
+                <button key={v.reg} onClick={()=>setSelectedReg(active ? null : v.reg)}
+                  className="w-full text-left p-2.5 border-[1.5px] rounded-md flex items-center gap-2.5 wobble"
+                  style={{ borderColor, background: active?'var(--ink)':'#fff', color: active?'var(--paper)':'var(--ink)', boxShadow: active?'2px 2px 0 0 #555':`2px 2px 0 0 ${borderColor}` }}>
                   <VehicleThumb v={v} size={26}/>
                   <div className="flex-1 min-w-0">
-                    <div className="mono text-[13px] font-bold tracking-wider">{v.reg}</div>
-                    {showEvent
-                      ? <div className="marquee-wrap" style={{maxWidth:120}}>
-                          <span className="marquee-inner hand text-[11px]"
-                            style={{color: hasRed ? 'var(--danger)' : 'var(--warn)'}}>
-                            {v.nextEvent}&nbsp;&nbsp;&nbsp;&nbsp;{v.nextEvent}&nbsp;&nbsp;&nbsp;&nbsp;
-                          </span>
-                        </div>
-                      : <div className="hand text-[11.5px] truncate" style={{opacity:active?0.8:0.65}}>{v.model}</div>
-                    }
+                    <div className="flex items-center gap-1.5">
+                      <span className="mono text-[12px] font-bold tracking-wider">{v.reg}</span>
+                      {ecu?.ignition && <span style={{width:6,height:6,borderRadius:'50%',display:'inline-block',background:active?'rgba(255,255,255,0.7)':'var(--ok)'}}/>}
+                    </div>
+                    <div className="hand text-[11px] truncate" style={{opacity:active?0.8:0.65}}>{v.model}</div>
+                    {ecu && !active && <div className="mono text-[10px]" style={{opacity:0.55}}>{ecu.ignition ? `${ecu.speed} km/h` : `senast ${ecu.updated}`}</div>}
                   </div>
-                  <StatusDot s={priorityDot}/>
+                  <div className="flex flex-col items-end gap-1">
+                    <StatusDot s={v.status}/>
+                    {!active && (hasRed||hasOrange) && <span style={{width:5,height:5,borderRadius:'50%',display:'inline-block',background:hasRed?'var(--danger)':'var(--warn)'}}/>}
+                  </div>
                 </button>
               );
             })}
           </div>
-
-          {/* Add vehicle */}
           <button className="ink-dash flex items-center justify-center gap-2 py-2.5 wobble">
             <span className="hand text-sm">＋ Lägg till fordon</span>
           </button>
         </div>
 
-        {/* ── Main area: map (default) or vehicle detail ── */}
+        {/* Main area */}
         <div className="flex-1 min-w-0">
           {!picked
-            ? <MapView
-                vehicles={VEHICLES}
-                colorful={colorful}
-                redAlerts={redAlerts}
-                orangeAlerts={orangeAlerts}
-                onSelectVehicle={setSelectedReg}
-              />
-            : <VehicleDetail
-                v={picked}
-                colorful={colorful}
-                redAlerts={redAlerts.filter(a => a.reg===picked.reg)}
-                orangeAlerts={orangeAlerts.filter(a => a.reg===picked.reg)}
-                onBack={()=>setSelectedReg(null)}
-              />
+            ? <MapView vehicles={VEHICLES} colorful={colorful} redAlerts={redAlerts} orangeAlerts={orangeAlerts} onSelectVehicle={setSelectedReg}/>
+            : <VehicleDetailE v={picked} colorful={colorful}
+                redAlerts={redAlerts.filter(a=>a.reg===picked.reg)}
+                orangeAlerts={orangeAlerts.filter(a=>a.reg===picked.reg)}
+                onBack={()=>setSelectedReg(null)}/>
           }
         </div>
       </div>
@@ -1082,248 +1561,15 @@ function OptionB({ colorful }) {
 }
 
 /* ============================================================
-   OPTION C — Fleet-health hub with urgency-sorted rows
-   ============================================================ */
-function OptionC({ colorful }) {
-  const [expandedReg, setExpandedReg] = useState('HIJ 654');
-  const sortOrder = { warn:0, off:1, ok:2 };
-  const sorted = [...VEHICLES].sort((a,b)=> sortOrder[a.status] - sortOrder[b.status]);
-  const counts = {
-    total: VEHICLES.length,
-    itrafik: VEHICLES.filter(v=>v.status==='ok').length,
-    narmar: VEHICLES.filter(v=>v.status==='warn').length,
-    avstalld: VEHICLES.filter(v=>v.status==='off').length,
-  };
-
-  return (
-    <div className="paper min-h-[800px]">
-      <SketchHeader/>
-      <div className="max-w-[1180px] mx-auto px-6 py-6">
-        {/* KPI strip */}
-        <div className="flex items-end justify-between mb-5">
-          <h1 className="hand font-bold text-3xl scribble inline-block">Flotthälsa</h1>
-          <div className="hand text-sm text-[var(--ink-mute)]">april 2026 · uppdaterad 07:42</div>
-        </div>
-
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="ink-box p-4">
-            <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">Totalt</div>
-            <div className="hand font-bold text-4xl">{counts.total}</div>
-            <div className="hand text-[12px] text-[var(--ink-mute)]">fordon i flottan</div>
-          </div>
-          <div className="ink-box p-4" style={{background: colorful ? '#eef7f0' : '#fff'}}>
-            <div className="flex items-center gap-1.5"><StatusDot s="ok"/><div className="mono text-[10px] uppercase tracking-wider">Itrafik</div></div>
-            <div className="hand font-bold text-4xl">{counts.itrafik}</div>
-            <div className="hand text-[12px] text-[var(--ink-mute)]">inga åtgärder nu</div>
-          </div>
-          <div className="ink-box p-4" style={{background: colorful ? '#fdf4d7' : '#fff'}}>
-            <div className="flex items-center gap-1.5"><StatusDot s="warn"/><div className="mono text-[10px] uppercase tracking-wider">Närmar sig</div></div>
-            <div className="hand font-bold text-4xl">{counts.narmar}</div>
-            <div className="hand text-[12px] text-[var(--ink-mute)]">inom 30 dagar</div>
-          </div>
-          <div className="ink-box p-4" style={{background: colorful ? '#fbe4e4' : '#fff'}}>
-            <div className="flex items-center gap-1.5"><StatusDot s="off"/><div className="mono text-[10px] uppercase tracking-wider">Avställda</div></div>
-            <div className="hand font-bold text-4xl">{counts.avstalld}</div>
-            <div className="hand text-[12px] text-[var(--ink-mute)]">ej i trafik</div>
-          </div>
-        </div>
-
-        {/* Section header */}
-        <div className="flex items-end justify-between mb-3">
-          <div>
-            <h2 className="hand font-bold text-2xl">Fordon — sorterade efter brådska</h2>
-            <p className="hand text-[var(--ink-mute)] text-[14px]">Klicka ett fordon för att se åtgärder.</p>
-          </div>
-          <div className="flex gap-2">
-            <button className="ink-btn" style={{fontSize:13}}>Exportera CSV</button>
-            <button className="ink-btn primary" style={{fontSize:13}}>＋ Fordon</button>
-          </div>
-        </div>
-
-        <div className="ink-box overflow-hidden">
-          {/* header row */}
-          <div className="grid grid-cols-[40px_90px_1fr_110px_110px_110px_120px_40px] px-3 py-2 mono text-[11px] text-[var(--ink-mute)] uppercase tracking-wider border-b border-dashed border-black/40 bg-[var(--paper-2)]">
-            <div></div>
-            <div>Regnr</div>
-            <div>Modell</div>
-            <div>Status</div>
-            <div>Besiktning</div>
-            <div>Mätare</div>
-            <div>Nästa</div>
-            <div></div>
-          </div>
-          {sorted.map((v,i) => {
-            const open = v.reg === expandedReg;
-            return (
-              <div key={v.reg} className={`border-b border-black/15 last:border-b-0 ${open?'bg-[var(--paper-2)]':''}`}>
-                <button onClick={()=>setExpandedReg(open ? null : v.reg)}
-                  className="w-full text-left grid grid-cols-[40px_90px_1fr_110px_110px_110px_120px_40px] px-3 py-2.5 items-center hover:bg-[var(--paper-2)]">
-                  <div><VehicleThumb v={v} size={22}/></div>
-                  <div className="mono font-bold tracking-wider text-[14px]">{v.reg}</div>
-                  <div className="hand text-[15px]">{v.model} <span className="text-[var(--ink-mute)]">· {v.year}</span></div>
-                  <div><span className="ink-pill" style={{fontSize:12, padding:'1px 8px',
-                    background: colorful && v.status==='ok' ? '#e8f5ea' : colorful && v.status==='warn' ? '#fdf3d4' : colorful && v.status==='off' ? '#fbe0e0' : '#fff'}}>
-                    <StatusDot s={v.status}/> <span className="ml-1">{STATUS_LABEL[v.status]}</span>
-                  </span></div>
-                  <div className="mono text-[13px]">{v.besiktning}</div>
-                  <div className="mono text-[13px]">{v.km.toLocaleString('sv-SE')} km</div>
-                  <div className="hand text-[13.5px]">{v.nextEvent}</div>
-                  <div className="hand text-[var(--ink-mute)]">{open?'▾':'▸'}</div>
-                </button>
-                {open && (
-                  <div className="px-4 pb-4 pt-1">
-                    <div className="grid grid-cols-[220px_1fr] gap-4">
-                      <div className="ink-box-soft p-3 bg-white flex flex-col items-center">
-                        <VehicleThumb v={v} size={60}/>
-                        <div className="mono text-[12px] mt-2 text-[var(--ink-mute)]">{v.dept}</div>
-                        <div className="hand text-[14px]">Förare: <b>{v.driver}</b></div>
-                      </div>
-                      <div>
-                        <div className="grid grid-cols-4 gap-2">
-                          {FUNCTIONS.slice(0,8).map(f => <FunctionTile key={f.k} f={f} colorful={colorful}/>)}
-                        </div>
-                        <div className="flex gap-2 mt-3">
-                          <button className="ink-btn primary" style={{fontSize:13}}>Öppna fordons-arbetsyta →</button>
-                          <button className="ink-btn" style={{fontSize:13}}>Snabbåtgärd: boka besiktning</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ============================================================
-   OPTION D — "Garage" metaphor: carousel of silhouettes + function wall
-   ============================================================ */
-function OptionD({ colorful }) {
-  const [pickedIdx, setPickedIdx] = useState(1);
-  const picked = VEHICLES[pickedIdx];
-
-  return (
-    <div className="paper-plain min-h-[800px]">
-      <SketchHeader/>
-      <div className="max-w-[1180px] mx-auto px-6 py-6">
-        <div className="flex items-end justify-between mb-4">
-          <div>
-            <h1 className="hand font-bold text-3xl">Garaget</h1>
-            <p className="hand text-[var(--ink-mute)] text-[15px]">Scrolla genom flottan. Valt fordon visas nedan.</p>
-          </div>
-          <div className="flex gap-2">
-            <button className="ink-btn" style={{fontSize:13}}>Lista-vy</button>
-            <button className="ink-btn primary" style={{fontSize:13}}>＋ Fordon</button>
-          </div>
-        </div>
-
-        {/* Carousel — horizontal scroll of thumbs */}
-        <div className="ink-box px-3 py-4 mb-6 overflow-x-auto">
-          <div className="flex gap-3 items-end" style={{minWidth:'max-content'}}>
-            {VEHICLES.map((v,i) => {
-              const active = i === pickedIdx;
-              return (
-                <button key={v.reg} onClick={()=>setPickedIdx(i)}
-                  className="flex flex-col items-center gap-1.5 px-3 py-2 rounded-md wobble"
-                  style={{
-                    background: active ? 'var(--ink)' : 'transparent',
-                    color: active ? 'var(--paper)' : 'var(--ink)',
-                    border: active ? '1.5px solid var(--ink)' : '1.5px dashed rgba(0,0,0,0.25)',
-                    minWidth: 120,
-                  }}>
-                  <div className="relative">
-                    <VehicleThumb v={v} size={active? 56 : 44}/>
-                    <span className={`dot ${v.status==='ok'?'ok':v.status==='warn'?'warn':'off'} absolute -top-1 -right-1`} style={{borderColor: active?'var(--paper)':'var(--ink)'}}></span>
-                  </div>
-                  <div className="mono text-[12.5px] font-bold tracking-wider">{v.reg}</div>
-                  <div className="hand text-[12px] text-center" style={{opacity: active ? 0.85 : 0.65, maxWidth:110}}>{v.model}</div>
-                </button>
-              );
-            })}
-            {/* add slot */}
-            <button className="flex flex-col items-center justify-center border-[1.5px] border-dashed border-black/40 rounded-md px-3 min-width-[110px]" style={{minWidth:110}}>
-              <div className="text-3xl hand">＋</div>
-              <div className="hand text-[12px]">nytt</div>
-            </button>
-          </div>
-        </div>
-
-        {/* Picked vehicle banner */}
-        <div className="grid grid-cols-[380px_1fr] gap-6 mb-6">
-          <div className="ink-box p-4 relative bg-[var(--paper-2)]">
-            <div className="tape" style={{top:-6, right:16}}></div>
-            <div className="flex items-center justify-center py-2">
-              <img src={`assets/vehicles/${picked.type}.svg`} alt="" className="silhouette-big" style={{width:260, height:130, objectFit:'contain'}}/>
-            </div>
-            <div className="text-center">
-              <div className="mono text-2xl font-bold tracking-wider">{picked.reg}</div>
-              <div className="hand text-[var(--ink-soft)]">{picked.model}</div>
-            </div>
-          </div>
-          <div>
-            <div className="flex flex-wrap gap-2 mb-3">
-              <span className="ink-pill" style={{background: colorful && picked.status==='ok' ? '#e8f5ea' : colorful && picked.status==='warn' ? '#fdf3d4' : '#fbe0e0'}}>
-                <StatusDot s={picked.status}/> <span className="ml-1">{STATUS_LABEL[picked.status]}</span>
-              </span>
-              <span className="ink-pill">{picked.dept}</span>
-              <span className="ink-pill">{picked.year}</span>
-              <span className="ink-pill">{picked.km.toLocaleString('sv-SE')} km</span>
-              <span className="ink-pill">Förare: {picked.driver}</span>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="ink-box-soft p-3">
-                <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">Besiktning</div>
-                <div className="hand font-bold text-lg mono">{picked.besiktning}</div>
-              </div>
-              <div className="ink-box-soft p-3">
-                <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">Försäkring</div>
-                <div className="hand font-bold text-lg">If Skade — aktiv</div>
-              </div>
-              <div className="ink-box-soft p-3">
-                <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider">Nästa händelse</div>
-                <div className="hand font-bold text-lg">{picked.nextEvent}</div>
-              </div>
-            </div>
-            <div className="mt-4 sticky-note inline-block">
-              "Pick-a-vehicle" = en tydlig bil i fokus, allt runt om är dess verktyg.
-            </div>
-          </div>
-        </div>
-
-        {/* Function wall */}
-        <h2 className="hand font-bold text-2xl mb-3">Funktioner för <span className="mono">{picked.reg}</span></h2>
-        <div className="grid grid-cols-4 gap-3">
-          {FUNCTIONS.map(f => <FunctionTile key={f.k} f={f} colorful={colorful}/>)}
-        </div>
-
-        {/* legend scribble */}
-        <div className="mt-8 flex items-center gap-6 hand text-[14px] text-[var(--ink-mute)]">
-          <div className="flex items-center gap-2"><StatusDot s="ok"/> Itrafik / ok</div>
-          <div className="flex items-center gap-2"><StatusDot s="warn"/> Inom 30 dagar</div>
-          <div className="flex items-center gap-2"><StatusDot s="off"/> Avställd</div>
-          <div className="ml-auto mono text-[11px]">data: Transportstyrelsen</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ============================================================
-   APP SHELL — tabs switch between 4 wireframe options
+   APP SHELL
    ============================================================ */
 function App() {
   const [tweaks, setTweaks] = useState(() => {
     const stored = (typeof TWEAK_DEFAULS !== 'undefined') ? TWEAK_DEFAULS : {};
     return { ...stored };
   });
-  const [option, setOption] = useState(tweaks.defaultOption || 'A');
   const [editMode, setEditMode] = useState(false);
 
-  // tweaks host protocol
   useEffect(() => {
     function onMsg(e) {
       if (e.data?.type === '__activate_edit_mode') setEditMode(true);
@@ -1342,64 +1588,17 @@ function App() {
     });
   }
 
-  // Apply body class for paper bg variant
   useEffect(() => {
     document.body.classList.toggle('no-rules', tweaks.paperBg === 'plain');
-    if (tweaks.paperBg === 'plain') {
-      document.documentElement.style.setProperty('--paper', '#fdfcf7');
-    } else {
-      document.documentElement.style.setProperty('--paper', '#fbfaf5');
-    }
-    // font switch
+    document.documentElement.style.setProperty('--paper', tweaks.paperBg === 'plain' ? '#fdfcf7' : '#fbfaf5');
     const map = { kalam:'Kalam', patrick:'Patrick Hand', caveat:'Caveat' };
-    const fam = map[tweaks.fontFamily] || 'Kalam';
-    document.documentElement.style.setProperty('--hand-font', fam);
+    document.documentElement.style.setProperty('--hand-font', map[tweaks.fontFamily] || 'Kalam');
   }, [tweaks]);
-
-  const options = {
-    A: { label:'A · Grid + drawer',     blurb:'Visuellt register, klicka → låda' },
-    B: { label:'B · Fleet Dashboard',     blurb:'Topbar KPIs · larmstyrning · karta → fordon' },
-    C: { label:'C · Flotthälsa-hub',    blurb:'Brådskande först, inline-utvik' },
-    D: { label:'D · Garage-metafor',    blurb:'Karusell + funktionsvägg' },
-    E: { label:'E · Arkitektur-dashboard', blurb:'Alla 6 moduler · full arkitekturvy', href:'Vehicle Dashboard Wireframes (1).html' },
-  };
 
   return (
     <div style={{fontFamily: `"${ {kalam:'Kalam', patrick:'Patrick Hand', caveat:'Caveat'}[tweaks.fontFamily] || 'Kalam'}", cursive`}}>
-      {/* Tabs strip */}
-      <div className="sticky top-0 z-50 bg-[var(--paper-2)] border-b-[1.5px] border-black">
-        <div className="max-w-[1180px] mx-auto px-6 pt-3 flex items-end gap-2 flex-wrap">
-          <div className="hand font-bold text-lg mr-3 whitespace-nowrap">Wireframes:</div>
-          {Object.entries(options).map(([k,o])=>(
-            o.href
-              ? <a key={k} href={o.href} className="tab">{o.label}</a>
-              : <button key={k} className={`tab ${option===k ? 'active' : ''}`} onClick={()=>setOption(k)}>{o.label}</button>
-          ))}
-          <div className="ml-auto hand text-[13px] text-[var(--ink-mute)] pb-2 whitespace-nowrap">{options[option].blurb}</div>
-        </div>
-      </div>
+      <OptionE colorful={tweaks.showColorTouches}/>
 
-      {option === 'A' && <OptionA colorful={tweaks.showColorTouches} showTape={tweaks.showTape}/>}
-      {option === 'B' && <OptionB colorful={tweaks.showColorTouches}/>}
-      {option === 'C' && <OptionC colorful={tweaks.showColorTouches}/>}
-      {option === 'D' && <OptionD colorful={tweaks.showColorTouches}/>}
-
-      {/* footer notes row */}
-      <div className="max-w-[1180px] mx-auto px-6 py-8 border-t border-dashed border-black/40">
-        <div className="flex flex-wrap items-start gap-4">
-          <div className="sticky-note" style={{maxWidth:280}}>
-            Alla 4 alternativ använder samma data & funktionsset — bara sättet att <i>välja ett fordon</i> och öppna dess verktyg skiljer sig.
-          </div>
-          <div className="sticky-note" style={{maxWidth:280, transform:'rotate(1.4deg)', background:'#caf0c4'}}>
-            Nästa: rita ut <b>en specifik funktion</b> (t.ex. Besiktning) i hi-fi för det vinnande alternativet.
-          </div>
-          <div className="sticky-note" style={{maxWidth:280, transform:'rotate(-0.6deg)', background:'#ffd7c2'}}>
-            Behåll "gooey search"-knappen som brand-moment i alla alt. (se vehicle_list.ex).
-          </div>
-        </div>
-      </div>
-
-      {/* Tweaks panel */}
       {editMode && (
         <div className="tweaks">
           <h4 className="hand">Tweaks</h4>
@@ -1421,16 +1620,6 @@ function App() {
           <div className="tweak-row">
             <label>Färgstänk</label>
             <input type="checkbox" checked={tweaks.showColorTouches} onChange={e=>updateTweak('showColorTouches', e.target.checked)}/>
-          </div>
-          <div className="tweak-row">
-            <label>Maskeringstejp</label>
-            <input type="checkbox" checked={tweaks.showTape} onChange={e=>updateTweak('showTape', e.target.checked)}/>
-          </div>
-          <div className="tweak-row">
-            <label>Startar på</label>
-            <select value={tweaks.defaultOption} onChange={e=>updateTweak('defaultOption', e.target.value)}>
-              <option>A</option><option>B</option><option>C</option><option>D</option>
-            </select>
           </div>
         </div>
       )}
