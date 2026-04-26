@@ -1882,26 +1882,22 @@ function ForarePanel({ v }) {
           </div>
         ) : (
           <div className="ink-box-soft overflow-hidden">
-            <div className="grid grid-cols-[1fr_1fr_80px] px-3 py-2 mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] border-b border-dashed border-black/30 bg-[var(--paper-2)]">
-              <div>Förare</div><div>Period(er)</div><div>Kontakt</div>
+            <div className="grid grid-cols-[200px_1fr] px-3 py-2 mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] border-b border-dashed border-black/30 bg-[var(--paper-2)]">
+              <div>Förare</div><div>Period(er)</div>
             </div>
-            {history.map((d, i) => {
-              const p = DRIVER_PROFILES[d.name];
-              return (
-                <div key={i} className="grid grid-cols-[1fr_1fr_80px] px-3 py-2.5 border-b border-black/10 last:border-b-0 items-start">
-                  <div>
-                    <div className="hand font-bold text-[14px]">{d.name}</div>
-                    {d.periods.length > 1 && <div className="hand text-[11px]" style={{color:'var(--warn)'}}>↩ återkom</div>}
-                  </div>
-                  <div className="space-y-0.5">
-                    {d.periods.map((period, j) => (
-                      <div key={j} className="mono text-[12px] text-[var(--ink-soft)]">{period}</div>
-                    ))}
-                  </div>
-                  <div className="mono text-[10px] text-[var(--ink-mute)]">{p ? p.phone.slice(-8) : '—'}</div>
+            {history.map((d, i) => (
+              <div key={i} className="grid grid-cols-[200px_1fr] px-3 py-2.5 border-b border-black/10 last:border-b-0 items-start">
+                <div>
+                  <div className="hand font-bold text-[14px]">{d.name}</div>
+                  {d.periods.length > 1 && <div className="hand text-[11px]" style={{color:'var(--warn)'}}>↩ återkom</div>}
                 </div>
-              );
-            })}
+                <div className="space-y-0.5">
+                  {d.periods.map((period, j) => (
+                    <div key={j} className="mono text-[12px] text-[var(--ink-soft)]">{period}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
