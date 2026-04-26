@@ -330,6 +330,23 @@ const DRIVER_PROFILES = {
   'Jonas Westman':     { phone:'+46 73 444 55 66', email:'jonas.westman@halmstadakeri.se',       license:'B',      licenseExpiry:'2028-02' },
 };
 
+const DRIVER_EXTRA = {
+  'Maria Lindqvist':   { role:'admin',  joined:'2023-01-15', lastLogin:'apr 25, 07:39', km:{privat:16,  tjänst:284}, attest:'amber', pending:2, lastTrip:'apr 24', harsh:0, incidents:0, autoKm:284, manualKm:16  },
+  'Johan Ek':          { role:'driver', joined:'2022-09-01', lastLogin:'apr 24, 05:44', km:{privat:0,   tjänst:112}, attest:'green', pending:0, lastTrip:'apr 24', harsh:3, incidents:1, autoKm:112, manualKm:0   },
+  'Sara Persson':      { role:'driver', joined:'2023-03-01', lastLogin:'apr 23, 08:02', km:{privat:32,  tjänst:98},  attest:'green', pending:0, lastTrip:'apr 23', harsh:0, incidents:0, autoKm:0,   manualKm:130 },
+  'Erik Sundberg':     { role:'driver', joined:'2022-12-01', lastLogin:'apr 25, 06:55', km:{privat:8,   tjänst:340}, attest:'green', pending:0, lastTrip:'apr 25', harsh:1, incidents:0, autoKm:340, manualKm:8   },
+  'Anna Berg':         { role:'driver', joined:'2022-04-01', lastLogin:'apr 22, 09:14', km:{privat:4,   tjänst:156}, attest:'red',   pending:5, lastTrip:'apr 20', harsh:0, incidents:1, autoKm:156, manualKm:4   },
+  'Peter Lund':        { role:'driver', joined:'2026-02-01', lastLogin:'apr 25, 05:30', km:{privat:0,   tjänst:483}, attest:'green', pending:0, lastTrip:'apr 25', harsh:2, incidents:0, autoKm:483, manualKm:0   },
+  'Nils Åberg':        { role:'driver', joined:'2022-06-01', lastLogin:'apr 24, 11:20', km:{privat:12,  tjänst:89},  attest:'amber', pending:1, lastTrip:'apr 24', harsh:0, incidents:0, autoKm:0,   manualKm:101 },
+  'Lisa Norling':      { role:'driver', joined:'2023-11-01', lastLogin:'apr 20, 14:30', km:{privat:28,  tjänst:112}, attest:'red',   pending:3, lastTrip:'apr 18', harsh:1, incidents:1, autoKm:112, manualKm:28  },
+  'Tobias Hård':       { role:'driver', joined:'2021-01-01', lastLogin:'nov 12, 2025',  km:{privat:0,   tjänst:0},   attest:'green', pending:0, lastTrip:'—',      harsh:0, incidents:0, autoKm:0,   manualKm:0   },
+  'Marcus Björk':      { role:'driver', joined:'2019-09-01', lastLogin:'jan 08, 2026',  km:{privat:0,   tjänst:0},   attest:'green', pending:0, lastTrip:'—',      harsh:0, incidents:0, autoKm:0,   manualKm:0   },
+  'Karin Lövgren':     { role:'driver', joined:'2020-03-01', lastLogin:'feb 14, 2026',  km:{privat:4,   tjänst:22},  attest:'green', pending:0, lastTrip:'apr 03', harsh:0, incidents:0, autoKm:22,  manualKm:4   },
+  'Agneta Söderström': { role:'driver', joined:'2023-06-01', lastLogin:'jan 31, 2026',  km:{privat:0,   tjänst:0},   attest:'green', pending:0, lastTrip:'—',      harsh:0, incidents:0, autoKm:0,   manualKm:0   },
+  'Håkan Nilsson':     { role:'driver', joined:'2021-10-01', lastLogin:'dec 01, 2025',  km:{privat:0,   tjänst:0},   attest:'green', pending:0, lastTrip:'—',      harsh:0, incidents:0, autoKm:0,   manualKm:0   },
+  'Jonas Westman':     { role:'driver', joined:'2022-02-01', lastLogin:'mar 15, 2026',  km:{privat:6,   tjänst:44},  attest:'amber', pending:1, lastTrip:'mar 15', harsh:0, incidents:0, autoKm:44,  manualKm:6   },
+};
+
 /* ============================================================
    Shared atoms — all hand-sketch flavoured
    ============================================================ */
@@ -1345,21 +1362,48 @@ function VehicleDetailE({ v, colorful, redAlerts, orangeAlerts, onBack }) {
 }
 
 /* ============================================================
-   FÖRARE DASHBOARD — Driver management
+   FÖRARE DASHBOARD — tier-adaptive driver management
    ============================================================ */
-function DriverInitials({ name, size=32 }) {
-  const parts = name.split(' ');
-  const init = parts.length >= 2 ? parts[0][0] + parts[parts.length-1][0] : name.slice(0,2);
+
+function AttestLight({ status='green', count=0 }) {
+  const C = { green:'var(--ok)', amber:'var(--warn)', red:'var(--danger)' };
+  const L = { green:'Signerat', amber:`${count} väntar`, red:`${count} försenade` };
   return (
-    <div className="rounded-full border-[1.5px] border-black flex items-center justify-center font-bold hand bg-white shrink-0"
-      style={{width:size, height:size, fontSize:Math.round(size*0.38)}}>
-      {init.toUpperCase()}
+    <div className="flex items-center gap-1.5">
+      <span style={{width:10,height:10,borderRadius:'50%',background:C[status],
+        border:'1.25px solid rgba(0,0,0,0.2)',display:'inline-block',flexShrink:0}}/>
+      <span className="hand text-sm" style={{color: status==='green'?'var(--ink-mute)':C[status]}}>
+        {L[status]}
+      </span>
     </div>
   );
 }
 
+function DriverInitials({ name, size=32, isLive=false }) {
+  const parts = name.split(' ');
+  const init = parts.length >= 2 ? parts[0][0] + parts[parts.length-1][0] : name.slice(0,2);
+  return (
+    <div className="relative shrink-0" style={{width:size, height:size}}>
+      <div className="rounded-full border-[1.5px] border-black flex items-center justify-center font-bold hand bg-white w-full h-full"
+        style={{fontSize:Math.round(size*0.38)}}>
+        {init.toUpperCase()}
+      </div>
+      {isLive && <span style={{position:'absolute',top:-1,right:-1,width:9,height:9,
+        borderRadius:'50%',background:'var(--ok)',border:'2px solid #fff',display:'block'}}/>}
+    </div>
+  );
+}
+
+const TIER_OPTIONS = [
+  { id:'core',      label:'Core' },
+  { id:'journal',   label:'Core + Journal' },
+  { id:'telematik', label:'Core + Telematik' },
+  { id:'pro',       label:'Pro' },
+  { id:'pro_plus',  label:'Pro +' },
+];
+
 function InviteModal({ onClose, onInvite }) {
-  const [form, setForm] = useState({ name:'', email:'', license:'B' });
+  const [form, setForm] = useState({ name:'', email:'', license:'B', role:'driver' });
   function submit(e) {
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim()) return;
@@ -1389,11 +1433,11 @@ function InviteModal({ onClose, onInvite }) {
               placeholder="fornamn@foretag.se" />
           </div>
           <div>
-            <label className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] block mb-1">Körkortsklass</label>
-            <select className="ink-box-soft w-full px-3 py-2 hand text-sm"
-              style={{fontFamily:'Kalam,cursive'}}
-              value={form.license} onChange={e=>setForm(f=>({...f,license:e.target.value}))}>
-              {['B','B, BE','C','C, CE','D','D, D1','A, B'].map(l=><option key={l} value={l}>{l}</option>)}
+            <label className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] block mb-1">Roll</label>
+            <select className="ink-box-soft w-full px-3 py-2 hand text-sm" style={{fontFamily:'Kalam,cursive'}}
+              value={form.role} onChange={e=>setForm(f=>({...f,role:e.target.value}))}>
+              <option value="driver">Förare</option>
+              <option value="admin">Admin</option>
             </select>
           </div>
           <div className="flex gap-2 pt-2">
@@ -1406,69 +1450,105 @@ function InviteModal({ onClose, onInvite }) {
   );
 }
 
-function AssignPanel({ driver, vehicles, onClose, onSave }) {
-  const [assigned, setAssigned] = useState(driver.assignedVehicle);
-  const [permitted, setPermitted] = useState(driver.permittedVehicles || []);
-  function togglePermit(reg) {
-    setPermitted(p => p.includes(reg) ? p.filter(r=>r!==reg) : [...p, reg]);
-  }
-  const activeVehicles = vehicles.filter(v=>v.status!=='off');
+function DriverDetailPanel({ driver, tier, onClose }) {
+  const ex = DRIVER_EXTRA[driver.name] || {};
+  const currentVeh = VEHICLES.find(v=>v.driver===driver.name);
+  const isLive = !!(currentVeh && ECU_DATA[currentVeh.reg]?.ignition);
+  const hasTelematik = ['telematik','pro','pro_plus'].includes(tier);
+  const hasJournal   = ['journal','pro','pro_plus'].includes(tier);
+  const hasCompliance= tier==='pro_plus';
   return (
     <div className="fixed inset-0 z-50 flex items-stretch justify-end" style={{background:'rgba(27,27,27,0.2)'}}>
-      <div className="ink-box flex flex-col" style={{width:420, background:'#fff', borderRadius:'10px 0 0 10px', overflowY:'auto'}}>
+      <div className="ink-box flex flex-col" style={{width:420,background:'#fff',borderRadius:'10px 0 0 10px'}}>
         <div className="p-5 border-b border-dashed border-black/30 flex items-center gap-3 shrink-0">
-          <DriverInitials name={driver.name} size={36}/>
+          <DriverInitials name={driver.name} size={40} isLive={hasTelematik && isLive}/>
           <div className="flex-1 min-w-0">
-            <div className="hand font-bold text-lg">{driver.name}</div>
-            <div className="mono text-[10px] text-[var(--ink-mute)]">Körkort {driver.license}</div>
+            <div className="flex items-center gap-2">
+              <div className="hand font-bold text-lg">{driver.name}</div>
+              {ex.role==='admin' && <span className="ink-pill" style={{fontSize:10,background:'var(--ink)',color:'var(--paper)'}}>Admin</span>}
+            </div>
+            <div className="mono text-[10px] text-[var(--ink-mute)]">{driver.email}</div>
           </div>
           <button onClick={onClose} className="hand text-[var(--ink-mute)] hover:text-[var(--ink)] text-xl leading-none">✕</button>
         </div>
-
         <div className="p-5 space-y-5 flex-1 overflow-y-auto">
           <div>
-            <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Tilldelat fordon — ansvarar för fordonet</div>
-            <div className="space-y-1.5">
-              <label className="ink-box-soft px-3 py-2 flex items-center gap-3 cursor-pointer">
-                <input type="radio" name="assigned" checked={!assigned} onChange={()=>setAssigned(null)} />
-                <span className="hand text-sm text-[var(--ink-mute)]">Inget fordon</span>
-              </label>
-              {activeVehicles.map(v=>(
-                <label key={v.reg} className="ink-box-soft px-3 py-2 flex items-center gap-3 cursor-pointer">
-                  <input type="radio" name="assigned" checked={assigned===v.reg} onChange={()=>setAssigned(v.reg)} />
-                  <VehicleThumb v={v} size={24}/>
-                  <div className="flex-1 min-w-0">
-                    <div className="hand font-bold text-sm">{v.reg}</div>
-                    <div className="mono text-[10px] text-[var(--ink-mute)] truncate">{v.model}</div>
-                  </div>
-                  {v.driver && v.driver!==driver.name && v.driver!=='—' && (
-                    <span className="mono text-[9px] text-[var(--warn)] shrink-0">nu: {v.driver.split(' ')[0]}</span>
-                  )}
-                </label>
-              ))}
+            <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Kontakt &amp; konto</div>
+            <div className="space-y-1">
+              <div className="flex gap-2"><span className="hand text-sm text-[var(--ink-mute)] w-28 shrink-0">Telefon</span><span className="hand text-sm">{driver.phone}</span></div>
+              <div className="flex gap-2"><span className="hand text-sm text-[var(--ink-mute)] w-28 shrink-0">Körkort</span><span className="hand text-sm">{driver.license} · utgår {driver.licenseExpiry}</span></div>
+              <div className="flex gap-2"><span className="hand text-sm text-[var(--ink-mute)] w-28 shrink-0">Gick med</span><span className="hand text-sm">{ex.joined||'—'}</span></div>
+              <div className="flex gap-2"><span className="hand text-sm text-[var(--ink-mute)] w-28 shrink-0">Senast inloggad</span><span className="hand text-sm">{ex.lastLogin||'—'}</span></div>
             </div>
           </div>
-
-          <div>
-            <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Behörigheter — får köra dessa fordon</div>
-            <div className="space-y-1.5">
-              {activeVehicles.map(v=>(
-                <label key={v.reg} className="ink-box-soft px-3 py-2 flex items-center gap-3 cursor-pointer">
-                  <input type="checkbox" checked={permitted.includes(v.reg)} onChange={()=>togglePermit(v.reg)} />
-                  <VehicleThumb v={v} size={24}/>
-                  <div className="flex-1 min-w-0">
-                    <div className="hand font-bold text-sm">{v.reg}</div>
-                    <div className="mono text-[10px] text-[var(--ink-mute)] truncate">{v.model}</div>
-                  </div>
-                </label>
-              ))}
+          {hasJournal && (
+            <div>
+              <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Körjournal — april 2026</div>
+              <div className="ink-box-soft p-3 space-y-2">
+                <div className="flex justify-between">
+                  <span className="hand text-sm text-[var(--ink-mute)]">Tjänstekörning</span>
+                  <span className="hand font-bold text-sm">{ex.km?.tjänst||0} km</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="hand text-sm text-[var(--ink-mute)]">Privatkörning</span>
+                  <span className="hand font-bold text-sm">{ex.km?.privat||0} km</span>
+                </div>
+                <div className="border-t border-dashed border-black/20 pt-2 flex justify-between">
+                  <span className="hand text-sm">Totalt</span>
+                  <span className="hand font-bold text-sm">{(ex.km?.tjänst||0)+(ex.km?.privat||0)} km</span>
+                </div>
+                <div className="pt-1 flex items-center gap-2">
+                  <span className="hand text-[12px] text-[var(--ink-mute)] mr-1">Attestering</span>
+                  <AttestLight status={ex.attest||'green'} count={ex.pending||0}/>
+                </div>
+              </div>
+              {(ex.pending||0)>0 && (
+                <button className="ink-btn accent w-full mt-2" style={{fontSize:13}}>
+                  Attestera {ex.pending} resor →
+                </button>
+              )}
             </div>
-          </div>
+          )}
+          {hasTelematik && currentVeh && (
+            <div>
+              <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Telematik</div>
+              <div className="ink-box-soft p-3 space-y-2">
+                {isLive && (
+                  <div className="flex items-center gap-2 pb-2 border-b border-dashed border-black/20">
+                    <span className="dot ok"/>
+                    <span className="hand font-bold text-sm">Kör {currentVeh.reg}</span>
+                    <span className="mono text-[10px] text-[var(--ink-mute)]">{ECU_DATA[currentVeh.reg]?.speed} km/h</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="hand text-sm text-[var(--ink-mute)]">Auto-fångade km apr</span>
+                  <span className="hand font-bold text-sm">{ex.autoKm||0} km</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="hand text-sm text-[var(--ink-mute)]">Hårda händelser apr</span>
+                  <span className="hand font-bold text-sm" style={{color:(ex.harsh||0)>2?'var(--warn)':'inherit'}}>{ex.harsh||0}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          {tier==='pro_plus' && (
+            <div>
+              <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Incidents senaste 30 dagar</div>
+              <div className="ink-box-soft p-3">
+                {(ex.incidents||0)===0
+                  ? <span className="hand text-sm text-[var(--ink-mute)]">Inga incidents</span>
+                  : <button className="hand text-sm" style={{color:'var(--danger)'}}>
+                      {ex.incidents} incident{ex.incidents>1?'s':''} — visa →
+                    </button>
+                }
+              </div>
+            </div>
+          )}
         </div>
-
         <div className="p-5 border-t border-dashed border-black/30 flex gap-2 shrink-0">
-          <button className="ink-btn accent flex-1" onClick={()=>{ onSave(driver.name, assigned, permitted); onClose(); }}>Spara →</button>
-          <button className="ink-btn" onClick={onClose}>Avbryt</button>
+          {hasCompliance && <button className="ink-btn flex-1" style={{fontSize:12}}>↓ Exportera PDF</button>}
+          <button className="ink-btn" style={{fontSize:12,color:'var(--danger)',borderColor:'var(--danger)'}}>Återkalla åtkomst</button>
+          <button className="ink-btn" onClick={onClose}>Stäng</button>
         </div>
       </div>
     </div>
@@ -1480,22 +1560,23 @@ function ForareDashboard() {
     Object.entries(DRIVER_PROFILES).map(([name, p]) => ({
       name, ...p,
       assignedVehicle: VEHICLES.find(v=>v.driver===name)?.reg || null,
-      permittedVehicles: [],
       status: 'active',
     }))
   , []);
 
+  const [tier, setTier]             = useState('core');
   const [drivers, setDrivers]       = useState(initDrivers);
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [assignTarget, setAssignTarget] = useState(null);
+  const [detailName, setDetailName] = useState(null);
   const [search, setSearch]         = useState('');
 
-  function handleInvite({ name, email, license }) {
-    setDrivers(d => [...d, { name, email, phone:'—', license, licenseExpiry:'—', assignedVehicle:null, permittedVehicles:[], status:'pending' }]);
-  }
+  const hasTelematik = ['telematik','pro','pro_plus'].includes(tier);
+  const hasJournal   = ['journal','pro','pro_plus'].includes(tier);
+  const hasIncidents = tier==='pro_plus';
+  const hasCompliance= tier==='pro_plus';
 
-  function handleSave(driverName, assignedReg, permittedRegs) {
-    setDrivers(d => d.map(dr => dr.name===driverName ? {...dr, assignedVehicle:assignedReg, permittedVehicles:permittedRegs} : dr));
+  function handleInvite({ name, email, license, role='driver' }) {
+    setDrivers(d => [...d, { name, email, phone:'—', license, licenseExpiry:'—', assignedVehicle:null, status:'pending', role }]);
   }
 
   function licSt(exp) {
@@ -1503,11 +1584,15 @@ function ForareDashboard() {
     return exp < '2026-04' ? 'expired' : exp <= '2026-06' ? 'expiring' : 'ok';
   }
 
-  const active   = drivers.filter(d=>d.status==='active');
-  const pending  = drivers.filter(d=>d.status==='pending');
-  const noVehicle    = active.filter(d=>!d.assignedVehicle);
-  const vehiclesFree = VEHICLES.filter(v=>v.status!=='off' && (v.driver==='—' || !v.driver));
-  const badLic       = active.filter(d=>licSt(d.licenseExpiry)!=='ok');
+  const active  = drivers.filter(d=>d.status==='active');
+  const pending = drivers.filter(d=>d.status==='pending');
+  const redAttest    = active.filter(d=>(DRIVER_EXTRA[d.name]?.attest)==='red');
+  const amberAttest  = active.filter(d=>(DRIVER_EXTRA[d.name]?.attest)==='amber');
+  const totalPending = active.reduce((s,d)=>s+(DRIVER_EXTRA[d.name]?.pending||0),0);
+  const onRoute      = active.filter(d=>{ const v=VEHICLES.find(vv=>vv.driver===d.name); return v&&ECU_DATA[v.reg]?.ignition; });
+  const totalHarsh   = active.reduce((s,d)=>s+(DRIVER_EXTRA[d.name]?.harsh||0),0);
+  const totalAutoKm  = active.reduce((s,d)=>s+(DRIVER_EXTRA[d.name]?.autoKm||0),0);
+  const totalIncidents = active.reduce((s,d)=>s+(DRIVER_EXTRA[d.name]?.incidents||0),0);
 
   const filtered = drivers.filter(d=>{
     if (!search) return true;
@@ -1515,7 +1600,7 @@ function ForareDashboard() {
     return d.name.toLowerCase().includes(q) || (d.email||'').toLowerCase().includes(q);
   });
 
-  const assignDriver = assignTarget ? drivers.find(d=>d.name===assignTarget) : null;
+  const detailDriver = detailName ? drivers.find(d=>d.name===detailName) : null;
 
   return (
     <div>
@@ -1525,37 +1610,74 @@ function ForareDashboard() {
           <div className="flex items-center gap-2.5 pr-6">
             <span className="dot ok"/>
             <div>
-              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Aktiva förare</div>
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">
+                {tier==='core' ? 'Förare' : 'Aktiva förare'}
+              </div>
               <div className="hand font-bold text-xl leading-tight">{active.length}</div>
             </div>
           </div>
           <div className="w-px h-9 bg-black/15 mr-6"/>
 
-          <div className="pr-6">
-            <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Utan fordon</div>
-            <div className="hand font-bold text-xl leading-tight" style={{color: noVehicle.length>0?'var(--warn)':'var(--ok)'}}>
-              {noVehicle.length}
+          {tier==='core' && (
+            <div className="pr-6">
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Admin</div>
+              <div className="hand font-bold text-xl leading-tight">
+                {active.filter(d=>(DRIVER_EXTRA[d.name]?.role)==='admin').length}
+              </div>
             </div>
-          </div>
-          <div className="w-px h-9 bg-black/15 mr-6"/>
+          )}
 
-          <div className="pr-6">
-            <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Fordon utan förare</div>
-            <div className="hand font-bold text-xl leading-tight" style={{color: vehiclesFree.length>0?'var(--warn)':'var(--ok)'}}>
-              {vehiclesFree.length}
+          {hasTelematik && <>
+            <div className="pr-6">
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Kör nu</div>
+              <div className="hand font-bold text-xl leading-tight" style={{color:onRoute.length>0?'var(--ok)':'var(--ink-mute)'}}>
+                {onRoute.length}
+              </div>
             </div>
-          </div>
-          <div className="w-px h-9 bg-black/15 mr-6"/>
-
-          <div className="pr-6">
-            <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Körkortsstatus</div>
-            <div className="hand font-bold text-xl leading-tight" style={{color: badLic.length>0?'var(--danger)':'var(--ok)'}}>
-              {badLic.length > 0 ? `${badLic.length} varning` : 'Alla OK ✓'}
-            </div>
-          </div>
-
-          {pending.length > 0 && <>
             <div className="w-px h-9 bg-black/15 mr-6"/>
+          </>}
+
+          {hasJournal && <>
+            <div className="pr-6">
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Attestering</div>
+              <div className="hand font-bold text-xl leading-tight" style={{color:redAttest.length>0?'var(--danger)':amberAttest.length>0?'var(--warn)':'var(--ok)'}}>
+                {redAttest.length>0 ? `${redAttest.length} försenade` : amberAttest.length>0 ? `${amberAttest.length} väntar` : 'Allt klart ✓'}
+              </div>
+            </div>
+            <div className="w-px h-9 bg-black/15 mr-6"/>
+            <div className="pr-6">
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Resor väntar sig</div>
+              <div className="hand font-bold text-xl leading-tight" style={{color:totalPending>0?'var(--warn)':'var(--ink-mute)'}}>
+                {totalPending>0 ? totalPending : '—'}
+              </div>
+            </div>
+            {hasTelematik && <div className="w-px h-9 bg-black/15 mr-6"/>}
+          </>}
+
+          {hasTelematik && !hasJournal && <>
+            <div className="pr-6">
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Hårda händelser apr</div>
+              <div className="hand font-bold text-xl leading-tight" style={{color:totalHarsh>5?'var(--warn)':'inherit'}}>{totalHarsh}</div>
+            </div>
+            <div className="w-px h-9 bg-black/15 mr-6"/>
+            <div className="pr-6">
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Auto-km apr</div>
+              <div className="hand font-bold text-xl leading-tight">{totalAutoKm.toLocaleString('sv-SE')}</div>
+            </div>
+          </>}
+
+          {hasIncidents && <>
+            <div className="w-px h-9 bg-black/15 mr-6"/>
+            <div>
+              <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Incidents 30 dagar</div>
+              <div className="hand font-bold text-xl leading-tight" style={{color:totalIncidents>0?'var(--danger)':'var(--ok)'}}>
+                {totalIncidents>0 ? totalIncidents : '—'}
+              </div>
+            </div>
+          </>}
+
+          {pending.length>0 && <>
+            <div className="w-px h-9 bg-black/15 mx-6"/>
             <div>
               <div className="mono text-[10px] text-[var(--ink-mute)] uppercase tracking-wider leading-none mb-0.5">Inbjudna</div>
               <div className="hand font-bold text-xl leading-tight">{pending.length} väntar</div>
@@ -1566,18 +1688,32 @@ function ForareDashboard() {
         </div>
       </div>
 
-      {/* Main content */}
       <div className="max-w-[1180px] mx-auto px-6 py-5">
+        {/* Tier selector — wireframe demo */}
+        <div className="flex items-center gap-2 mb-5 pb-4 border-b border-dashed border-black/20">
+          <span className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] shrink-0">Visa som</span>
+          <div className="flex gap-1.5 flex-wrap">
+            {TIER_OPTIONS.map(t=>(
+              <button key={t.id} onClick={()=>setTier(t.id)}
+                className={`ink-pill ${tier===t.id?'filled':''}`} style={{fontSize:11}}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Toolbar */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="ink-box-soft px-3 py-2 flex items-center gap-2 max-w-xs">
+          <div className="ink-box-soft px-3 py-2 flex items-center gap-2">
             <span className="mono text-xs opacity-60">🔎︎</span>
             <input value={search} onChange={e=>setSearch(e.target.value)}
               placeholder="sök namn eller e-post…"
-              className="bg-transparent hand text-sm outline-none w-48"
+              className="bg-transparent hand text-sm outline-none w-44"
               style={{fontFamily:'Kalam,cursive', color:'var(--ink)'}} />
           </div>
+          {hasCompliance && (
+            <button className="ink-btn" style={{fontSize:12}}>↓ Exportera alla förare</button>
+          )}
           <button className="ink-btn accent ml-auto" onClick={()=>setInviteOpen(true)}>
             + Bjud in förare
           </button>
@@ -1589,61 +1725,132 @@ function ForareDashboard() {
             <thead>
               <tr style={{borderBottom:'1.5px solid var(--ink)', background:'var(--paper-2)'}}>
                 <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Förare</th>
-                <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Körkort</th>
-                <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Utgår</th>
-                <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Tilldelat fordon</th>
-                <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Behörigheter</th>
+                {tier==='core' && <>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Roll</th>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Gick med</th>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Senaste inloggning</th>
+                </>}
+                {hasJournal && !hasTelematik && <>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Körkort</th>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Km apr</th>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Attestering</th>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Senaste resa</th>
+                </>}
+                {hasTelematik && !hasJournal && <>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Körkort</th>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Kör nu</th>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Senast sedd</th>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Hårda händelser</th>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Km totalt</th>
+                </>}
+                {hasTelematik && hasJournal && <>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Körkort</th>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Km apr</th>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Attestering</th>
+                  <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Kör nu</th>
+                </>}
+                {hasIncidents && <th className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] text-left px-4 py-2.5">Incidents 30d</th>}
                 <th className="px-4 py-2.5"/>
               </tr>
             </thead>
             <tbody>
-              {filtered.filter(d=>d.status==='active').map((d,i)=>{
-                const ls  = licSt(d.licenseExpiry);
-                const veh = d.assignedVehicle ? VEHICLES.find(v=>v.reg===d.assignedVehicle) : null;
+              {filtered.map((d,i) => {
+                const ex = DRIVER_EXTRA[d.name] || {};
+                const isPending = d.status==='pending';
+                const ls = licSt(d.licenseExpiry);
+                const currentVeh = VEHICLES.find(v=>v.driver===d.name);
+                const isLive = !!(currentVeh && ECU_DATA[currentVeh.reg]?.ignition);
                 return (
-                  <tr key={d.name} style={{borderTop: i>0?'1px solid rgba(27,27,27,0.08)':undefined}}
-                    className="hover:bg-[var(--paper-2)] transition-colors">
+                  <tr key={d.name}
+                    style={{borderTop:i>0?'1px solid rgba(27,27,27,0.08)':undefined, opacity:isPending?0.65:1, cursor:isPending?'default':'pointer'}}
+                    className={isPending?'':'hover:bg-[var(--paper-2)] transition-colors'}
+                    onClick={()=>!isPending&&setDetailName(d.name)}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2.5">
-                        <DriverInitials name={d.name} size={30}/>
+                        <DriverInitials name={d.name} size={30} isLive={hasTelematik && isLive}/>
                         <div>
-                          <div className="hand font-bold text-sm">{d.name}</div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="hand font-bold text-sm">{d.name}</span>
+                            {isPending && <span className="ink-pill" style={{fontSize:10,borderStyle:'dashed'}}>Väntar</span>}
+                            {!isPending && ex.role==='admin' && <span className="ink-pill" style={{fontSize:10,background:'var(--ink)',color:'var(--paper)'}}>Admin</span>}
+                          </div>
                           <div className="mono text-[10px] text-[var(--ink-mute)]">{d.email}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className="ink-pill" style={{fontSize:11}}>{d.license}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="hand text-sm" style={{
-                        color: ls==='expired'?'var(--danger)': ls==='expiring'?'var(--warn)':'var(--ink-mute)'
-                      }}>
-                        {d.licenseExpiry}{ls==='expired'?' ✕':ls==='expiring'?' ⚠':''}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {veh ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className={`dot ${veh.status}`}/>
-                          <span className="hand font-bold text-sm">{veh.reg}</span>
-                          <span className="mono text-[10px] text-[var(--ink-mute)]">{veh.model}</span>
-                        </div>
-                      ) : (
-                        <span className="hand text-sm text-[var(--ink-mute)]">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {d.permittedVehicles.length > 0
-                        ? <span className="hand text-sm">{d.permittedVehicles.length} fordon</span>
-                        : <span className="hand text-sm text-[var(--ink-mute)]">—</span>
-                      }
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <button className="ink-btn" style={{fontSize:12, padding:'3px 10px'}}
-                        onClick={()=>setAssignTarget(d.name)}>
-                        Hantera →
-                      </button>
+                    {tier==='core' && <>
+                      <td className="px-4 py-3"><span className="hand text-sm">{ex.role==='admin'?'Admin':'Förare'}</span></td>
+                      <td className="px-4 py-3"><span className="hand text-sm text-[var(--ink-mute)]">{ex.joined||'—'}</span></td>
+                      <td className="px-4 py-3"><span className="hand text-sm text-[var(--ink-mute)]">{ex.lastLogin||'—'}</span></td>
+                    </>}
+                    {hasJournal && !hasTelematik && <>
+                      <td className="px-4 py-3">
+                        <span className="hand text-sm" style={{color:ls==='expired'?'var(--danger)':ls==='expiring'?'var(--warn)':'var(--ink-mute)'}}>
+                          {d.license}{ls==='expired'?' ✕':ls==='expiring'?' ⚠':''}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {!isPending && <div>
+                          <span className="hand text-sm">{(ex.km?.tjänst||0)+(ex.km?.privat||0)} km</span>
+                          <div className="mono text-[9px] text-[var(--ink-mute)]">{ex.km?.tjänst||0} tjänst · {ex.km?.privat||0} privat</div>
+                        </div>}
+                      </td>
+                      <td className="px-4 py-3">
+                        {!isPending && <AttestLight status={ex.attest||'green'} count={ex.pending||0}/>}
+                      </td>
+                      <td className="px-4 py-3"><span className="hand text-sm text-[var(--ink-mute)]">{ex.lastTrip||'—'}</span></td>
+                    </>}
+                    {hasTelematik && !hasJournal && <>
+                      <td className="px-4 py-3"><span className="hand text-sm text-[var(--ink-mute)]">{d.license}</span></td>
+                      <td className="px-4 py-3">
+                        {isLive
+                          ? <div className="flex items-center gap-1.5"><span className="dot ok"/><span className="hand font-bold text-sm">{currentVeh.reg}</span></div>
+                          : <span className="hand text-sm text-[var(--ink-mute)]">—</span>}
+                      </td>
+                      <td className="px-4 py-3"><span className="hand text-sm text-[var(--ink-mute)]">{ex.lastLogin||'—'}</span></td>
+                      <td className="px-4 py-3">
+                        <span className="hand text-sm" style={{color:(ex.harsh||0)>2?'var(--warn)':'inherit'}}>{ex.harsh||0}</span>
+                      </td>
+                      <td className="px-4 py-3"><span className="hand text-sm">{ex.autoKm||0} km</span></td>
+                    </>}
+                    {hasTelematik && hasJournal && <>
+                      <td className="px-4 py-3">
+                        <span className="hand text-sm" style={{color:ls==='expired'?'var(--danger)':ls==='expiring'?'var(--warn)':'var(--ink-mute)'}}>
+                          {d.license}{ls==='expired'?' ✕':ls==='expiring'?' ⚠':''}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {!isPending && <div>
+                          <span className="hand text-sm">{(ex.km?.tjänst||0)+(ex.km?.privat||0)} km</span>
+                          <div className="mono text-[9px] text-[var(--ink-mute)]">{ex.autoKm||0} auto · {ex.manualKm||0} manuell</div>
+                        </div>}
+                      </td>
+                      <td className="px-4 py-3">
+                        {!isPending && <AttestLight status={ex.attest||'green'} count={ex.pending||0}/>}
+                      </td>
+                      <td className="px-4 py-3">
+                        {isLive
+                          ? <div className="flex items-center gap-1.5"><span className="dot ok"/><span className="hand font-bold text-sm">{currentVeh.reg}</span></div>
+                          : <span className="hand text-sm text-[var(--ink-mute)]">—</span>}
+                      </td>
+                    </>}
+                    {hasIncidents && (
+                      <td className="px-4 py-3">
+                        {(ex.incidents||0)>0
+                          ? <span className="hand text-sm" style={{color:'var(--danger)'}}>{ex.incidents}</span>
+                          : <span className="hand text-sm text-[var(--ink-mute)]">—</span>}
+                      </td>
+                    )}
+                    <td className="px-4 py-3 text-right" onClick={e=>e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1.5">
+                        {hasCompliance && !isPending && (
+                          <button className="ink-btn" style={{fontSize:11,padding:'2px 8px'}}>↓ PDF</button>
+                        )}
+                        {!isPending && (
+                          <button className="ink-btn" style={{fontSize:12,padding:'3px 10px'}}
+                            onClick={()=>setDetailName(d.name)}>→</button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -1652,46 +1859,21 @@ function ForareDashboard() {
           </table>
         </div>
 
-        {/* Pending invites */}
-        {filtered.filter(d=>d.status==='pending').length > 0 && (
-          <div className="mb-5">
-            <div className="mono text-[10px] uppercase tracking-wider text-[var(--ink-mute)] mb-2">Inbjudna — väntar på svar</div>
-            <div className="space-y-2">
-              {filtered.filter(d=>d.status==='pending').map(d=>(
-                <div key={d.name} className="ink-dash p-3 flex items-center gap-3">
-                  <DriverInitials name={d.name} size={28}/>
-                  <div className="flex-1 min-w-0">
-                    <div className="hand font-bold text-sm">{d.name}</div>
-                    <div className="mono text-[10px] text-[var(--ink-mute)]">{d.email} · Körkort {d.license}</div>
-                  </div>
-                  <span className="ink-pill" style={{fontSize:11, borderStyle:'dashed'}}>Väntar</span>
-                </div>
-              ))}
+        {/* Core upsell — Law 1: add the meaningful */}
+        {tier==='core' && (
+          <div className="ink-dash p-4 flex items-center gap-3">
+            <span className="text-xl">✎</span>
+            <div>
+              <div className="hand font-bold text-sm">Följ körsträckor per förare</div>
+              <div className="hand text-sm text-[var(--ink-mute)]">Lägg till Körjournal för att se km, privat/tjänst-split och attestering direkt i den här vyn.</div>
             </div>
-          </div>
-        )}
-
-        {/* Vehicles without a driver */}
-        {vehiclesFree.length > 0 && (
-          <div>
-            <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{color:'var(--warn)'}}>
-              Fordon utan tilldelad förare
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {vehiclesFree.map(v=>(
-                <div key={v.reg} className="ink-box-soft px-3 py-2 flex items-center gap-2">
-                  <span className={`dot ${v.status}`}/>
-                  <span className="hand font-bold text-sm">{v.reg}</span>
-                  <span className="mono text-[10px] text-[var(--ink-mute)]">{v.model}</span>
-                </div>
-              ))}
-            </div>
+            <button className="ink-btn accent ml-auto shrink-0" style={{fontSize:12}}>Lägg till Körjournal →</button>
           </div>
         )}
       </div>
 
       {inviteOpen && <InviteModal onClose={()=>setInviteOpen(false)} onInvite={handleInvite}/>}
-      {assignDriver && <AssignPanel driver={assignDriver} vehicles={VEHICLES} onClose={()=>setAssignTarget(null)} onSave={handleSave}/>}
+      {detailDriver && <DriverDetailPanel driver={detailDriver} tier={tier} onClose={()=>setDetailName(null)}/>}
     </div>
   );
 }
